@@ -13,7 +13,7 @@ I have converted the weights from the original Pytorch implementation.
 1) Using the command line 
 
 ```
-python text2image.py --prompt="An astronaut riding a hourse"
+python text2image.py --prompt="An astronaut riding a horse"
 ```
 
 2) Using the python interface
