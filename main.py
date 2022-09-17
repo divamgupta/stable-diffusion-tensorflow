@@ -1,10 +1,15 @@
 from stable_diffusion_tf.stable_diffusion import get_model, text2image
 
-text_encoder, diffusion_model, decoder = get_model(512, 512)
+text_encoder, diffusion_model, decoder = get_model(512, 512, download_weights=False)
+
+
+diffusion_model.load_weights("/tmp/diffusion_model.h5")
+decoder.load_weights("/tmp/decoder.h5")
+text_encoder.load_weights("/tmp/text_encoder.h5")
 
 
 
-img = text2image("A epic and beautiful rococo werewolf drinking coffee, in a burning coffee shop. ultra-detailed. anime, pixiv, uhd 8k cryengine, octane render" , 
+img = text2image("Spider-Gwen Gwen-Stacy Skyscraper Pink White Pink-White Spiderman Photo-realistic 4K" , 
 	img_height=512, 
 	img_width=512,  
 	text_encoder=text_encoder, 
