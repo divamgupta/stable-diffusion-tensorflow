@@ -141,7 +141,7 @@ def text2image(prompt , img_height, img_width,  text_encoder, diffusion_model, d
     latent = tf.random.normal((batch_size,n_h,n_w,4))
 
 
-    for index, timestep in (t:=tqdm(list(enumerate(timesteps))[::-1])):
+    for index, timestep in (tqdm(list(enumerate(timesteps))[::-1])):
         t.set_description("%3d %3d" % (index, timestep))
         e_t = get_model_output(latent, timestep)
         x_prev, pred_x0 = get_x_prev_and_pred_x0(latent, e_t, index)
