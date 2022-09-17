@@ -72,6 +72,8 @@ def text2image(prompt , img_height, img_width,  text_encoder, diffusion_model, d
     n_h = img_height//8
     n_w = img_width//8
 
+
+
     tokenizer = SimpleTokenizer()
     inputs = tokenizer.encode(prompt)
 
