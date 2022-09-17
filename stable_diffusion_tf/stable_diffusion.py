@@ -11,7 +11,7 @@ from .clip_tokeniser import SimpleTokenizer
 text_max_len = 77
 
 
-def get_model(img_height, img_width):
+def get_model(img_height, img_width, download_weights=True):
     text_max_len = 77
     n_h = img_height//8
     n_w = img_width//8
@@ -35,6 +35,23 @@ def get_model(img_height, img_width):
     latent = tf.keras.layers.Input((n_h,n_w,4))
     decoder = Decoder()
     decoder = tf.keras.models.Model(latent , decoder(latent))
+
+    if download_weights:
+
+        decoder.load_weights(tf.keras.utils.get_file(
+            "decoder.h5",
+            "https://huggingface.co/divamgupta/stable-diffusion-tensorflow/resolve/main/decoder.h5",
+            hash_algorithm="sha256", file_hash="76925d9a8dd5235113f74667ad1a80149e941d65b1f80e8993e722dec2629a21"))
+
+        text_encoder.load_weights(tf.keras.utils.get_file(
+            "text_encoder.h5",
+            "https://huggingface.co/divamgupta/stable-diffusion-tensorflow/resolve/main/text_encoder.h5",
+            hash_algorithm="sha256", file_hash="3e9645f40c00d5696aca18393c2c49ef825f495f2a312d14f1e537269329617f"))
+
+        diffusion_model.load_weights(tf.keras.utils.get_file(
+            "diffusion_model.h5",
+            "https://huggingface.co/divamgupta/stable-diffusion-tensorflow/resolve/main/diffusion_model.h5",
+            hash_algorithm="sha256", file_hash="c28f8a1f6296d8eb4d9469041065e480f823871c1dcc7689be9e8f4cc7e048a0"))
 
     return text_encoder, diffusion_model, decoder
 
