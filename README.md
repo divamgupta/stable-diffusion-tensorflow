@@ -2,6 +2,12 @@
 
 A Keras / Tensorflow implementation of Stable Diffusion.
 
+This implementation is easy to understand and have a minimal code footprint.
+
+I have converted the weights from the original Pytorch implementation. 
+
+
+
 ## How to use
 
 1) Using the command line 
