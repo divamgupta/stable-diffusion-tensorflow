@@ -3,7 +3,7 @@ from stable_diffusion_tf.stable_diffusion import get_model, text2image
 text_encoder, diffusion_model, decoder = get_model(512, 512)
 
 
-diffusion_model.load_weights("/tmp/unet.h5")
+diffusion_model.load_weights("/tmp/diffusion_model.h5")
 decoder.load_weights("/tmp/decoder.h5")
 text_encoder.load_weights("/tmp/text_encoder.h5")
 

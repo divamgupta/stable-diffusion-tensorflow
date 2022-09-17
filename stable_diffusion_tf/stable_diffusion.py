@@ -6,8 +6,7 @@ import math
 from .autoencoder_kl import Decoder
 from .diffusion_model import UNetModel
 from .clip_encoder import CLIPTextTransformer
-from transformers import CLIPTokenizer
-
+from .clip_tokeniser import SimpleTokenizer
 
 text_max_len = 77
 
@@ -56,11 +55,11 @@ def text2image(prompt , img_height, img_width,  text_encoder, diffusion_model, d
     n_h = img_height//8
     n_w = img_width//8
 
-    tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-base-patch32")
-    inputs = tokenizer([prompt], padding=True)
+    tokenizer = SimpleTokenizer()
+    inputs = tokenizer.encode(prompt)
 
-    assert len(inputs['input_ids'][0]) < 77 , "Prompt is too long"
-    phrase = inputs['input_ids'][0] + [49407]*(77-len(inputs['input_ids'][0]))
+    assert len(inputs) < 77 , "Prompt is too long"
+    phrase = inputs + [49407]*(77-len(inputs))
 
     pos_ids = tf.convert_to_tensor(np.array(list(range(77)))[None].astype('int32'))
     pos_ids = np.repeat(pos_ids , batch_size, axis=0)
