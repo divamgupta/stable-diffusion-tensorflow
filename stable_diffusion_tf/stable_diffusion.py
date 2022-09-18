@@ -37,11 +37,11 @@ class Text2Image:
         freqs = np.exp(-math.log(max_period) * np.arange(0, half, dtype="float32") / half)
         args = np.array(timesteps) * freqs
         embedding = np.concatenate([np.cos(args), np.sin(args)])
-        return (embedding).reshape(1, -1)
+        return tf.convert_to_tensor(embedding.reshape(1, -1))
 
     def get_model_output(self, latent, t, context, unconditional_context, unconditional_guidance_scale):
         timesteps = np.array([t])
-        t_emb = tf.convert_to_tensor(timestep_embedding(timesteps))
+        t_emb = self.timestep_embedding(timesteps)
         t_emb = np.repeat(t_emb, self.batch_size, axis=0)
         unconditional_latent = self.diffusion_model.predict_on_batch([latent, t_emb, unconditional_context])
         latent = self.diffusion_model.predict_on_batch([latent, t_emb, context])
