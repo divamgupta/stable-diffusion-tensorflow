@@ -21,7 +21,7 @@ class Text2Image:
         self.batch_size = batch_size
         self.tokenizer = SimpleTokenizer()
 
-        text_encoder, diffusion_model, decoder = get_model(img_height, img_width)
+        text_encoder, diffusion_model, decoder = get_models(img_height, img_width)
         self.text_encoder = text_encoder
         self.diffusion_model = diffusion_model
         self.decoder = decoder
@@ -99,9 +99,9 @@ class Text2Image:
 
         latent = tf.random.normal((self.batch_size, n_h, n_w, 4))
 
-        t = tqdm(list(enumerate(timesteps))[::-1])
-        for index, timestep in t:
-            t.set_description("%3d %3d" % (index, timestep))
+        progbar = tqdm(list(enumerate(timesteps))[::-1])
+        for index, timestep in progbar:
+            progbar.set_description(f"{index:3d} {timestep:3d}")
             e_t = self.get_model_output(
                 latent,
                 timestep,
@@ -120,32 +120,43 @@ class Text2Image:
         return np.clip(decoded, 0, 255).astype("uint8")
 
 
-def get_model(img_height, img_width, download_weights=True):
-    MAX_TEXT_LEN = 77
+def get_models(img_height, img_width, download_weights=True):
     n_h = img_height // 8
     n_w = img_width // 8
 
+    # Create text encoder
     input_word_ids = keras.layers.Input(shape=(MAX_TEXT_LEN,), dtype=tf.int32)
     input_pos_ids = keras.layers.Input(shape=(MAX_TEXT_LEN,), dtype=tf.int32)
     embeds = CLIPTextTransformer()([input_word_ids, input_pos_ids])
     text_encoder = keras.models.Model([input_word_ids, input_pos_ids], embeds)
 
+    # Creation diffusion UNet
     context = keras.layers.Input((MAX_TEXT_LEN, 768))
     t_emb = keras.layers.Input((320,))
     latent = keras.layers.Input((n_h, n_w, 4))
     unet = UNetModel()
-
     diffusion_model = keras.models.Model(
         [latent, t_emb, context], unet([latent, t_emb, context])
     )
 
+    # Create decoder
     latent = keras.layers.Input((n_h, n_w, 4))
     decoder = Decoder()
     decoder = keras.models.Model(latent, decoder(latent))
 
-    text_encoder.load_weights("text_encoder.h5")
-    diffusion_model.load_weights("diffusion_model.h5")
-    decoder.load_weights("decoder.h5")
+    text_encoder_weights_fpath = keras.utils.get_file(
+        origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/text_encoder.h5",
+        file_hash="d7805118aeb156fc1d39e38a9a082b05501e2af8c8fbdc1753c9cb85212d6619")
+    diffusion_model_weights_fpath = keras.utils.get_file(
+        origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/diffusion_model.h5",
+        file_hash="a5b2eea58365b18b40caee689a2e5d00f4c31dbcb4e1d58a9cf1071f55bbbd3a")
+    decoder_weights_fpath = keras.utils.get_file(
+        origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/decoder.h5",
+        file_hash="0e2c7e4bbf32962daa37ff3b744cf2503f000ead2c8ffaa412e6cf5bec066b6b")
+
+    text_encoder.load_weights(text_encoder_weights_fpath)
+    diffusion_model.load_weights(diffusion_model_weights_fpath)
+    decoder.load_weights(decoder_weights_fpath)
 
     return text_encoder, diffusion_model, decoder
 
