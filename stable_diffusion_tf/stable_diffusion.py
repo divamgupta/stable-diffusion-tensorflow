@@ -164,4 +164,3 @@ def get_models(img_height, img_width, download_weights=True):
     decoder.load_weights(decoder_weights_fpath)
 
     return text_encoder, diffusion_model, decoder
-
