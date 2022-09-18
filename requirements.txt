@@ -1,3 +1,4 @@
 tensorflow
 tensorflow_addons
 ftfy
+tqdm
