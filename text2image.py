@@ -1,5 +1,6 @@
-from stable_diffusion_tf.stable_diffusion import get_model, text2image
+from stable_diffusion_tf.stable_diffusion import Text2Image
 import argparse
+from PIL import Image
 
 
 parser = argparse.ArgumentParser()
@@ -39,23 +40,18 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-text_encoder, diffusion_model, decoder = get_model(512, 512, download_weights=True)
+generator = Text2Image(
+    img_height=args.H, 
+    img_width=args.W,
+    batch_size=1,
+    jit_compile=True)  # Also try jit_compile=False, might be faster on your hardware
 
-
-
-img = text2image(args.prompt , 
-	img_height=args.H, 
-	img_width=args.W,  
-	text_encoder=text_encoder, 
-	diffusion_model=diffusion_model, 
-	decoder=decoder,  
-	batch_size=1, 
+img = generator.generate(
+    args.prompt, 
 	n_steps=args.steps, 
-	unconditional_guidance_scale =args.scale , 
-	temperature = 1
+	unconditional_guidance_scale =args.scale, 
+	temperature=1
 )
 
-
-from PIL import Image
 Image.fromarray(img[0]).save("output.png")
 print("saved at output.png")
