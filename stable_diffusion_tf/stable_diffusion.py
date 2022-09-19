@@ -36,6 +36,7 @@ class Text2Image:
         num_steps=25,
         unconditional_guidance_scale=7.5,
         temperature=1,
+        seed=None,
     ):
         # Tokenize prompt (i.e. starting context)
         inputs = self.tokenizer.encode(prompt)
@@ -59,7 +60,7 @@ class Text2Image:
         )
         timesteps = np.arange(1, 1000, 1000 // num_steps)
         latent, alphas, alphas_prev = self.get_starting_parameters(
-            timesteps, batch_size
+            timesteps, batch_size, seed
         )
 
         # Diffusion stage
@@ -76,7 +77,7 @@ class Text2Image:
             )
             a_t, a_prev = alphas[index], alphas_prev[index]
             latent, pred_x0 = self.get_x_prev_and_pred_x0(
-                latent, e_t, index, a_t, a_prev, temperature
+                latent, e_t, index, a_t, a_prev, temperature, seed
             )
 
         # Decoding stage
@@ -113,23 +114,23 @@ class Text2Image:
             latent - unconditional_latent
         )
 
-    def get_x_prev_and_pred_x0(self, x, e_t, index, a_t, a_prev, temperature):
+    def get_x_prev_and_pred_x0(self, x, e_t, index, a_t, a_prev, temperature, seed):
         sigma_t = 0
         sqrt_one_minus_at = math.sqrt(1 - a_t)
         pred_x0 = (x - sqrt_one_minus_at * e_t) / math.sqrt(a_t)
 
         # Direction pointing to x_t
         dir_xt = math.sqrt(1.0 - a_prev - sigma_t**2) * e_t
-        noise = sigma_t * tf.random.normal(x.shape) * temperature
+        noise = sigma_t * tf.random.normal(x.shape, seed=seed) * temperature
         x_prev = math.sqrt(a_prev) * pred_x0 + dir_xt
         return x_prev, pred_x0
 
-    def get_starting_parameters(self, timesteps, batch_size):
+    def get_starting_parameters(self, timesteps, batch_size, seed):
         n_h = self.img_height // 8
         n_w = self.img_width // 8
         alphas = [_ALPHAS_CUMPROD[t] for t in timesteps]
         alphas_prev = [1.0] + alphas[:-1]
-        latent = tf.random.normal((batch_size, n_h, n_w, 4))
+        latent = tf.random.normal((batch_size, n_h, n_w, 4), seed=seed)
         return latent, alphas, alphas_prev
 
 
