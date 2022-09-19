@@ -50,7 +50,7 @@ generator = Text2Image(
 )
 img = generator.generate(
     args.prompt,
-    n_steps=args.steps,
+    num_steps=args.steps,
     unconditional_guidance_scale=args.scale,
     temperature=1,
 )

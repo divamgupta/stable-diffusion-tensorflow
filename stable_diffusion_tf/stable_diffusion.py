@@ -37,7 +37,7 @@ class Text2Image:
         self.unconditional_tokens = tf.convert_to_tensor(unconditional_tokens)
 
     def generate(
-        self, prompt, n_steps=25, unconditional_guidance_scale=7.5, temperature=1
+        self, prompt, num_steps=25, unconditional_guidance_scale=7.5, temperature=1
     ):
         # Tokenize prompt (i.e. starting context)
         inputs = self.tokenizer.encode(prompt)
@@ -56,7 +56,7 @@ class Text2Image:
         unconditional_context = self.text_encoder.predict_on_batch(
             [self.unconditional_tokens, pos_ids]
         )
-        timesteps = np.arange(1, 1000, 1000 // n_steps)
+        timesteps = np.arange(1, 1000, 1000 // num_steps)
         latent, alphas, alphas_prev = self.get_starting_parameters(timesteps)
 
         # Diffusion stage

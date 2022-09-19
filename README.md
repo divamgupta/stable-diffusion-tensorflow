@@ -17,22 +17,21 @@ python text2image.py --prompt="An astronaut riding a horse"
 2) Using the python interface
 
 ```
-pip install --upgrade git+https://github.com/fchollet/stable-diffusion-tensorflow
+pip install git+https://github.com/fchollet/stable-diffusion-tensorflow
 ```
 
 ```python
 from stable_diffusion_tf.stable_diffusion import Text2Image
 
-img = Text2Image( 
+generator = Text2Image( 
     img_height=512,
     img_width=512,
     jit_compile=False,
     batch_size=1,
 )
-
 img = generator.generate(
     "An astronaut riding a horse",
-    n_steps=50,
+    num_steps=50,
     unconditional_guidance_scale=7.5,
     temperature=1,
 )
