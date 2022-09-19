@@ -2,17 +2,17 @@ import tensorflow as tf
 from tensorflow import keras
 import tensorflow_addons as tfa
 
-from .layers import quick_gelu, apply_seq, td_dot, gelu, GEGLU, PaddedConv2D
+from .layers import apply_seq, PaddedConv2D
 
 
 class AttentionBlock(keras.layers.Layer):
-    def __init__(self, in_channels):
+    def __init__(self, channels):
         super().__init__()
         self.norm = tfa.layers.GroupNormalization(epsilon=1e-5)
-        self.q = PaddedConv2D(in_channels, in_channels, 1)
-        self.k = PaddedConv2D(in_channels, in_channels, 1)
-        self.v = PaddedConv2D(in_channels, in_channels, 1)
-        self.proj_out = PaddedConv2D(in_channels, in_channels, 1)
+        self.q = PaddedConv2D(channels, 1)
+        self.k = PaddedConv2D(channels, 1)
+        self.v = PaddedConv2D(channels, 1)
+        self.proj_out = PaddedConv2D(channels, 1)
 
     def call(self, x):
         h_ = self.norm(x)
@@ -41,11 +41,11 @@ class ResnetBlock(keras.layers.Layer):
     def __init__(self, in_channels, out_channels=None):
         super().__init__()
         self.norm1 = tfa.layers.GroupNormalization(epsilon=1e-5)
-        self.conv1 = PaddedConv2D(in_channels, out_channels, 3, padding=1)
+        self.conv1 = PaddedConv2D(out_channels, 3, padding=1)
         self.norm2 = tfa.layers.GroupNormalization(epsilon=1e-5)
-        self.conv2 = PaddedConv2D(out_channels, out_channels, 3, padding=1)
+        self.conv2 = PaddedConv2D(out_channels, 3, padding=1)
         self.nin_shortcut = (
-            PaddedConv2D(in_channels, out_channels, 1)
+            PaddedConv2D(out_channels, 1)
             if in_channels != out_channels
             else lambda x: x
         )
@@ -72,8 +72,8 @@ class Decoder(keras.models.Model):
         super().__init__()
         sizes = [(128, 256), (256, 512), (512, 512), (512, 512)]
 
-        self.post_quant_conv = PaddedConv2D(4, 4, 1)
-        self.conv_in = PaddedConv2D(4, 512, 3, padding=1)
+        self.post_quant_conv = PaddedConv2D(4, 1)
+        self.conv_in = PaddedConv2D(512, 3, padding=1)
         self.mid = Mid(512)
         self.upp = keras.layers.UpSampling2D(size=(2, 2))
 
@@ -89,11 +89,11 @@ class Decoder(keras.models.Model):
                 }
             )
             if i != 0:
-                arr[-1]["upsample"] = {"conv": PaddedConv2D(s[0], s[0], 3, padding=1)}
+                arr[-1]["upsample"] = {"conv": PaddedConv2D(s[0], 3, padding=1)}
         self.up = arr
 
         self.norm_out = tfa.layers.GroupNormalization(epsilon=1e-5)
-        self.conv_out = PaddedConv2D(128, 3, 3, padding=1)
+        self.conv_out = PaddedConv2D(3, 3, padding=1)
 
     def call(self, x, training=False):
         x = self.post_quant_conv(1 / 0.18215 * x)
@@ -104,8 +104,6 @@ class Decoder(keras.models.Model):
             for b in l["block"]:
                 x = b(x)
             if "upsample" in l:
-                # https://pytorch.org/docs/stable/generated/torch.nn.functional.interpolate.html ?
-                bs, c, py, px = x.shape
                 x = self.upp(x)
                 x = l["upsample"]["conv"](x)
 

@@ -3,7 +3,7 @@ from tensorflow import keras
 import tensorflow_addons as tfa
 import numpy as np
 
-from .layers import quick_gelu, PaddedConv2D, apply_seq, td_dot, gelu, GEGLU
+from .layers import quick_gelu
 
 
 class CLIPAttention(keras.layers.Layer):
@@ -13,10 +13,10 @@ class CLIPAttention(keras.layers.Layer):
         self.num_heads = 12
         self.head_dim = self.embed_dim // self.num_heads
         self.scale = self.head_dim**-0.5
-        self.q_proj = keras.layers.Dense(self.embed_dim, activation=None)
-        self.k_proj = keras.layers.Dense(self.embed_dim, activation=None)
-        self.v_proj = keras.layers.Dense(self.embed_dim, activation=None)
-        self.out_proj = keras.layers.Dense(self.embed_dim, activation=None)
+        self.q_proj = keras.layers.Dense(self.embed_dim)
+        self.k_proj = keras.layers.Dense(self.embed_dim)
+        self.v_proj = keras.layers.Dense(self.embed_dim)
+        self.out_proj = keras.layers.Dense(self.embed_dim)
 
     def _shape(self, tensor, seq_len: int, bsz: int):
         a = tf.reshape(tensor, (bsz, seq_len, self.num_heads, self.head_dim))
@@ -74,7 +74,6 @@ class CLIPEncoderLayer(keras.layers.Layer):
         residual = hidden_states
         hidden_states = self.layer_norm2(hidden_states)
 
-        # MLP
         hidden_states = self.fc1(hidden_states)
         hidden_states = quick_gelu(hidden_states)
         hidden_states = self.fc2(hidden_states)
@@ -121,7 +120,7 @@ class CLIPTextTransformer(keras.models.Model):
             np.triu(np.ones((1, 1, 77, 77), dtype="float32") * -np.inf, k=1)
         )
 
-    def call(self, inputs, training=False):
+    def call(self, inputs):
         input_ids, position_ids = inputs
         x = self.embeddings([input_ids, position_ids])
         x = self.encoder([x, self.causal_attention_mask])

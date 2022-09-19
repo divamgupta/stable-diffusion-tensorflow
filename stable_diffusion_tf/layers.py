@@ -3,7 +3,7 @@ from tensorflow import keras
 
 
 class PaddedConv2D(keras.layers.Layer):
-    def __init__(self, in_channels, out_channels, kernel_size, padding=0, stride=1):
+    def __init__(self, out_channels, kernel_size, padding=0, stride=1):
         super().__init__()
         self.padding2d = keras.layers.ZeroPadding2D(
             padding=(padding, padding), data_format=None
@@ -18,7 +18,7 @@ class PaddedConv2D(keras.layers.Layer):
 
 
 class GEGLU(keras.layers.Layer):
-    def __init__(self, dim_in, dim_out):
+    def __init__(self, dim_out):
         super().__init__()
         self.proj = keras.layers.Dense(dim_out * 2)
         self.dim_out = dim_out

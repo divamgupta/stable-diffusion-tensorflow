@@ -2,16 +2,16 @@ import tensorflow as tf
 from tensorflow import keras
 import tensorflow_addons as tfa
 
-from .layers import quick_gelu, PaddedConv2D, apply_seq, td_dot, gelu, GEGLU
+from .layers import PaddedConv2D, apply_seq, td_dot, GEGLU
 
 
 class ResBlock(keras.layers.Layer):
-    def __init__(self, channels, emb_channels, out_channels):
+    def __init__(self, channels, out_channels):
         super().__init__()
         self.in_layers = [
             tfa.layers.GroupNormalization(epsilon=1e-5),
             keras.activations.swish,
-            PaddedConv2D(channels, out_channels, 3, padding=1),
+            PaddedConv2D(out_channels, 3, padding=1),
         ]
         self.emb_layers = [
             keras.activations.swish,
@@ -20,12 +20,10 @@ class ResBlock(keras.layers.Layer):
         self.out_layers = [
             tfa.layers.GroupNormalization(epsilon=1e-5),
             keras.activations.swish,
-            PaddedConv2D(out_channels, out_channels, 3, padding=1),
+            PaddedConv2D(out_channels, 3, padding=1),
         ]
         self.skip_connection = (
-            PaddedConv2D(channels, out_channels, 1)
-            if channels != out_channels
-            else lambda x: x
+            PaddedConv2D(out_channels, 1) if channels != out_channels else lambda x: x
         )
 
     def call(self, inputs):
@@ -39,7 +37,7 @@ class ResBlock(keras.layers.Layer):
 
 
 class CrossAttention(keras.layers.Layer):
-    def __init__(self, query_dim, context_dim, n_heads, d_head):
+    def __init__(self, n_heads, d_head):
         super().__init__()
         self.to_q = keras.layers.Dense(n_heads * d_head, use_bias=False)
         self.to_k = keras.layers.Dense(n_heads * d_head, use_bias=False)
@@ -75,45 +73,34 @@ class CrossAttention(keras.layers.Layer):
         return apply_seq(h_, self.to_out)
 
 
-class FeedForward(keras.layers.Layer):
-    def __init__(self, dim, mult=4):
-        super().__init__()
-        self.net = [GEGLU(dim, dim * mult), lambda x: x, keras.layers.Dense(dim)]
-
-    def call(self, x):
-        return apply_seq(x, self.net)
-
-
 class BasicTransformerBlock(keras.layers.Layer):
-    def __init__(self, dim, context_dim, n_heads, d_head):
+    def __init__(self, dim, n_heads, d_head):
         super().__init__()
         self.norm1 = keras.layers.LayerNormalization(epsilon=1e-5)
-        self.attn1 = CrossAttention(dim, dim, n_heads, d_head)
+        self.attn1 = CrossAttention(n_heads, d_head)
 
         self.norm2 = keras.layers.LayerNormalization(epsilon=1e-5)
-        self.attn2 = CrossAttention(dim, context_dim, n_heads, d_head)
+        self.attn2 = CrossAttention(n_heads, d_head)
 
         self.norm3 = keras.layers.LayerNormalization(epsilon=1e-5)
-        self.ff = FeedForward(dim)
+        self.geglu = GEGLU(dim * 4)
+        self.dense = keras.layers.Dense(dim)
 
     def call(self, inputs):
         x, context = inputs
         x = self.attn1([self.norm1(x)]) + x
         x = self.attn2([self.norm2(x), context]) + x
-        return self.ff(self.norm3(x)) + x
+        return self.dense(self.geglu(self.norm3(x))) + x
 
 
 class SpatialTransformer(keras.layers.Layer):
-    def __init__(self, channels, context_dim, n_heads, d_head):
+    def __init__(self, channels, n_heads, d_head):
         super().__init__()
         self.norm = tfa.layers.GroupNormalization(epsilon=1e-5)
-
         assert channels == n_heads * d_head
-        self.proj_in = PaddedConv2D(channels, n_heads * d_head, 1)
-        self.transformer_blocks = [
-            BasicTransformerBlock(channels, context_dim, n_heads, d_head)
-        ]
-        self.proj_out = PaddedConv2D(n_heads * d_head, channels, 1)
+        self.proj_in = PaddedConv2D(n_heads * d_head, 1)
+        self.transformer_blocks = [BasicTransformerBlock(channels, n_heads, d_head)]
+        self.proj_out = PaddedConv2D(channels, 1)
 
     def call(self, inputs):
         x, context = inputs
@@ -131,7 +118,7 @@ class SpatialTransformer(keras.layers.Layer):
 class Downsample(keras.layers.Layer):
     def __init__(self, channels):
         super().__init__()
-        self.op = PaddedConv2D(channels, channels, 3, stride=2, padding=1)
+        self.op = PaddedConv2D(channels, 3, stride=2, padding=1)
 
     def call(self, x):
         return self.op(x)
@@ -141,7 +128,7 @@ class Upsample(keras.layers.Layer):
     def __init__(self, channels):
         super().__init__()
         self.ups = keras.layers.UpSampling2D(size=(2, 2))
-        self.conv = PaddedConv2D(channels, channels, 3, padding=1)
+        self.conv = PaddedConv2D(channels, 3, padding=1)
 
     def call(self, x):
         x = self.ups(x)
@@ -157,53 +144,53 @@ class UNetModel(keras.models.Model):
             keras.layers.Dense(1280),
         ]
         self.input_blocks = [
-            [PaddedConv2D(4, 320, kernel_size=3, padding=1)],
-            [ResBlock(320, 1280, 320), SpatialTransformer(320, 768, 8, 40)],
-            [ResBlock(320, 1280, 320), SpatialTransformer(320, 768, 8, 40)],
+            [PaddedConv2D(320, kernel_size=3, padding=1)],
+            [ResBlock(320, 320), SpatialTransformer(320, 8, 40)],
+            [ResBlock(320, 320), SpatialTransformer(320, 8, 40)],
             [Downsample(320)],
-            [ResBlock(320, 1280, 640), SpatialTransformer(640, 768, 8, 80)],
-            [ResBlock(640, 1280, 640), SpatialTransformer(640, 768, 8, 80)],
+            [ResBlock(320, 640), SpatialTransformer(640, 8, 80)],
+            [ResBlock(640, 640), SpatialTransformer(640, 8, 80)],
             [Downsample(640)],
-            [ResBlock(640, 1280, 1280), SpatialTransformer(1280, 768, 8, 160)],
-            [ResBlock(1280, 1280, 1280), SpatialTransformer(1280, 768, 8, 160)],
+            [ResBlock(640, 1280), SpatialTransformer(1280, 8, 160)],
+            [ResBlock(1280, 1280), SpatialTransformer(1280, 8, 160)],
             [Downsample(1280)],
-            [ResBlock(1280, 1280, 1280)],
-            [ResBlock(1280, 1280, 1280)],
+            [ResBlock(1280, 1280)],
+            [ResBlock(1280, 1280)],
         ]
         self.middle_block = [
-            ResBlock(1280, 1280, 1280),
-            SpatialTransformer(1280, 768, 8, 160),
-            ResBlock(1280, 1280, 1280),
+            ResBlock(1280, 1280),
+            SpatialTransformer(1280, 8, 160),
+            ResBlock(1280, 1280),
         ]
         self.output_blocks = [
-            [ResBlock(2560, 1280, 1280)],
-            [ResBlock(2560, 1280, 1280)],
-            [ResBlock(2560, 1280, 1280), Upsample(1280)],
-            [ResBlock(2560, 1280, 1280), SpatialTransformer(1280, 768, 8, 160)],
-            [ResBlock(2560, 1280, 1280), SpatialTransformer(1280, 768, 8, 160)],
+            [ResBlock(2560, 1280)],
+            [ResBlock(2560, 1280)],
+            [ResBlock(2560, 1280), Upsample(1280)],
+            [ResBlock(2560, 1280), SpatialTransformer(1280, 8, 160)],
+            [ResBlock(2560, 1280), SpatialTransformer(1280, 8, 160)],
             [
-                ResBlock(1920, 1280, 1280),
-                SpatialTransformer(1280, 768, 8, 160),
+                ResBlock(1920, 1280),
+                SpatialTransformer(1280, 8, 160),
                 Upsample(1280),
             ],
-            [ResBlock(1920, 1280, 640), SpatialTransformer(640, 768, 8, 80)],  # 6
-            [ResBlock(1280, 1280, 640), SpatialTransformer(640, 768, 8, 80)],
+            [ResBlock(1920, 640), SpatialTransformer(640, 8, 80)],  # 6
+            [ResBlock(1280, 640), SpatialTransformer(640, 8, 80)],
             [
-                ResBlock(960, 1280, 640),
-                SpatialTransformer(640, 768, 8, 80),
+                ResBlock(960, 640),
+                SpatialTransformer(640, 8, 80),
                 Upsample(640),
             ],
-            [ResBlock(960, 1280, 320), SpatialTransformer(320, 768, 8, 40)],
-            [ResBlock(640, 1280, 320), SpatialTransformer(320, 768, 8, 40)],
-            [ResBlock(640, 1280, 320), SpatialTransformer(320, 768, 8, 40)],
+            [ResBlock(960, 320), SpatialTransformer(320, 8, 40)],
+            [ResBlock(640, 320), SpatialTransformer(320, 8, 40)],
+            [ResBlock(640, 320), SpatialTransformer(320, 8, 40)],
         ]
         self.out = [
             tfa.layers.GroupNormalization(epsilon=1e-5),
             keras.activations.swish,
-            PaddedConv2D(320, 4, kernel_size=3, padding=1),
+            PaddedConv2D(4, kernel_size=3, padding=1),
         ]
 
-    def call(self, inputs, training=False):
+    def call(self, inputs):
         x, t_emb, context = inputs
         emb = apply_seq(t_emb, self.time_embed)
 
@@ -217,16 +204,15 @@ class UNetModel(keras.models.Model):
             return x
 
         saved_inputs = []
-        for i, b in enumerate(self.input_blocks):
+        for b in self.input_blocks:
             for bb in b:
-                inppp = x
                 x = run(x, bb)
             saved_inputs.append(x)
 
         for bb in self.middle_block:
             x = run(x, bb)
 
-        for i, b in enumerate(self.output_blocks):
+        for b in self.output_blocks:
             x = tf.concat([x, saved_inputs.pop()], axis=-1)
             for bb in b:
                 x = run(x, bb)
