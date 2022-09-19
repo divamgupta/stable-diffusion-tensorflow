@@ -8,13 +8,15 @@ created by @divamgupta. The weights were ported from the original implementation
 
 ## Usage
 
-1) Using the command line 
+1) Try it out with [this GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK).
+
+2) Using the command line :
 
 ```
 python text2image.py --prompt="An astronaut riding a horse"
 ```
 
-2) Using the python interface
+3) Using the python interface:
 
 ```
 pip install git+https://github.com/fchollet/stable-diffusion-tensorflow
