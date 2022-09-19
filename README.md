@@ -28,13 +28,13 @@ generator = Text2Image(
     img_height=512,
     img_width=512,
     jit_compile=False,
-    batch_size=1,
 )
 img = generator.generate(
     "An astronaut riding a horse",
     num_steps=50,
     unconditional_guidance_scale=7.5,
     temperature=1,
+	batch_size=1,
 )
 Image.fromarray(img[0]).save("output.png")
 ```

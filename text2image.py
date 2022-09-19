@@ -45,14 +45,13 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-generator = Text2Image(
-    img_height=args.H, img_width=args.W, batch_size=1, jit_compile=False
-)
+generator = Text2Image(img_height=args.H, img_width=args.W, jit_compile=False)
 img = generator.generate(
     args.prompt,
     num_steps=args.steps,
     unconditional_guidance_scale=args.scale,
     temperature=1,
+    batch_size=1,
 )
 Image.fromarray(img[0]).save(args.output)
 print(f"saved at {args.output}")

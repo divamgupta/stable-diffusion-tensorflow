@@ -15,12 +15,9 @@ MAX_TEXT_LEN = 77
 
 
 class Text2Image:
-    def __init__(
-        self, img_height=1000, img_width=1000, batch_size=1, jit_compile=False
-    ):
+    def __init__(self, img_height=1000, img_width=1000, jit_compile=False):
         self.img_height = img_height
         self.img_width = img_width
-        self.batch_size = batch_size
         self.tokenizer = SimpleTokenizer()
 
         text_encoder, diffusion_model, decoder = get_models(img_height, img_width)
@@ -32,32 +29,38 @@ class Text2Image:
             self.diffusion_model.compile(jit_compile=True)
             self.decoder.compile(jit_compile=True)
 
-        unconditional_tokens = np.array(_UNCONDITIONAL_TOKENS)[None].astype("int32")
-        unconditional_tokens = np.repeat(unconditional_tokens, batch_size, axis=0)
-        self.unconditional_tokens = tf.convert_to_tensor(unconditional_tokens)
-
     def generate(
-        self, prompt, num_steps=25, unconditional_guidance_scale=7.5, temperature=1
+        self,
+        prompt,
+        batch_size=1,
+        num_steps=25,
+        unconditional_guidance_scale=7.5,
+        temperature=1,
     ):
         # Tokenize prompt (i.e. starting context)
         inputs = self.tokenizer.encode(prompt)
         assert len(inputs) < 77, "Prompt is too long (should be < 77 tokens)"
         phrase = inputs + [49407] * (77 - len(inputs))
         phrase = np.array(phrase)[None].astype("int32")
-        phrase = np.repeat(phrase, self.batch_size, axis=0)
+        phrase = np.repeat(phrase, batch_size, axis=0)
 
         # Encode prompt tokens (and their positions) into a "context vector"
         pos_ids = np.array(list(range(77)))[None].astype("int32")
-        pos_ids = np.repeat(pos_ids, self.batch_size, axis=0)
+        pos_ids = np.repeat(pos_ids, batch_size, axis=0)
         context = self.text_encoder.predict_on_batch([phrase, pos_ids])
 
         # Encode unconditional tokens (and their positions into an
         # "unconditional context vector"
+        unconditional_tokens = np.array(_UNCONDITIONAL_TOKENS)[None].astype("int32")
+        unconditional_tokens = np.repeat(unconditional_tokens, batch_size, axis=0)
+        self.unconditional_tokens = tf.convert_to_tensor(unconditional_tokens)
         unconditional_context = self.text_encoder.predict_on_batch(
             [self.unconditional_tokens, pos_ids]
         )
         timesteps = np.arange(1, 1000, 1000 // num_steps)
-        latent, alphas, alphas_prev = self.get_starting_parameters(timesteps)
+        latent, alphas, alphas_prev = self.get_starting_parameters(
+            timesteps, batch_size
+        )
 
         # Diffusion stage
         progbar = tqdm(list(enumerate(timesteps))[::-1])
@@ -69,6 +72,7 @@ class Text2Image:
                 context,
                 unconditional_context,
                 unconditional_guidance_scale,
+                batch_size,
             )
             a_t, a_prev = alphas[index], alphas_prev[index]
             latent, pred_x0 = self.get_x_prev_and_pred_x0(
@@ -90,11 +94,17 @@ class Text2Image:
         return tf.convert_to_tensor(embedding.reshape(1, -1))
 
     def get_model_output(
-        self, latent, t, context, unconditional_context, unconditional_guidance_scale
+        self,
+        latent,
+        t,
+        context,
+        unconditional_context,
+        unconditional_guidance_scale,
+        batch_size,
     ):
         timesteps = np.array([t])
         t_emb = self.timestep_embedding(timesteps)
-        t_emb = np.repeat(t_emb, self.batch_size, axis=0)
+        t_emb = np.repeat(t_emb, batch_size, axis=0)
         unconditional_latent = self.diffusion_model.predict_on_batch(
             [latent, t_emb, unconditional_context]
         )
@@ -114,12 +124,12 @@ class Text2Image:
         x_prev = math.sqrt(a_prev) * pred_x0 + dir_xt
         return x_prev, pred_x0
 
-    def get_starting_parameters(self, timesteps):
+    def get_starting_parameters(self, timesteps, batch_size):
         n_h = self.img_height // 8
         n_w = self.img_width // 8
         alphas = [_ALPHAS_CUMPROD[t] for t in timesteps]
         alphas_prev = [1.0] + alphas[:-1]
-        latent = tf.random.normal((self.batch_size, n_h, n_w, 4))
+        latent = tf.random.normal((batch_size, n_h, n_w, 4))
         return latent, alphas, alphas_prev
 
 
