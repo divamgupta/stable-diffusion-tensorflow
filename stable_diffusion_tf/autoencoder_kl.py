@@ -5,21 +5,20 @@ import tensorflow_addons as tfa
 from .layers import quick_gelu, apply_seq, td_dot, gelu, GEGLU, PaddedConv2D
 
 
-class AttnBlock(keras.layers.Layer):
+class AttentionBlock(keras.layers.Layer):
     def __init__(self, in_channels):
-        super(AttnBlock, self).__init__()
+        super().__init__()
         self.norm = tfa.layers.GroupNormalization(epsilon=1e-5)
         self.q = PaddedConv2D(in_channels, in_channels, 1)
         self.k = PaddedConv2D(in_channels, in_channels, 1)
         self.v = PaddedConv2D(in_channels, in_channels, 1)
         self.proj_out = PaddedConv2D(in_channels, in_channels, 1)
 
-    # copied from AttnBlock in ldm repo
     def call(self, x):
         h_ = self.norm(x)
         q, k, v = self.q(h_), self.k(h_), self.v(h_)
 
-        # compute attention
+        # Compute attention
         b, h, w, c = q.shape
         q = tf.reshape(q, (-1, h * w, c))  # b,hw,c
         k = keras.layers.Permute((3, 1, 2))(k)
@@ -28,7 +27,7 @@ class AttnBlock(keras.layers.Layer):
         w_ = w_ * (c ** (-0.5))
         w_ = keras.activations.softmax(w_)
 
-        # attend to values
+        # Attend to values
         v = keras.layers.Permute((3, 1, 2))(v)
         v = tf.reshape(v, (-1, c, h * w))
         w_ = keras.layers.Permute((2, 1))(w_)
@@ -40,7 +39,7 @@ class AttnBlock(keras.layers.Layer):
 
 class ResnetBlock(keras.layers.Layer):
     def __init__(self, in_channels, out_channels=None):
-        super(ResnetBlock, self).__init__()
+        super().__init__()
         self.norm1 = tfa.layers.GroupNormalization(epsilon=1e-5)
         self.conv1 = PaddedConv2D(in_channels, out_channels, 3, padding=1)
         self.norm2 = tfa.layers.GroupNormalization(epsilon=1e-5)
@@ -59,9 +58,9 @@ class ResnetBlock(keras.layers.Layer):
 
 class Mid(keras.layers.Layer):
     def __init__(self, block_in):
-        super(Mid, self).__init__()
+        super().__init__()
         self.block_1 = ResnetBlock(block_in, block_in)
-        self.attn_1 = AttnBlock(block_in)
+        self.attn_1 = AttentionBlock(block_in)
         self.block_2 = ResnetBlock(block_in, block_in)
 
     def call(self, x):
@@ -70,8 +69,8 @@ class Mid(keras.layers.Layer):
 
 class Decoder(keras.models.Model):
     def __init__(self):
-        super(Decoder, self).__init__()
-        sz = [(128, 256), (256, 512), (512, 512), (512, 512)]
+        super().__init__()
+        sizes = [(128, 256), (256, 512), (512, 512), (512, 512)]
 
         self.post_quant_conv = PaddedConv2D(4, 4, 1)
         self.conv_in = PaddedConv2D(4, 512, 3, padding=1)
@@ -79,7 +78,7 @@ class Decoder(keras.models.Model):
         self.upp = keras.layers.UpSampling2D(size=(2, 2))
 
         arr = []
-        for i, s in enumerate(sz):
+        for i, s in enumerate(sizes):
             arr.append(
                 {
                     "block": [
@@ -98,7 +97,6 @@ class Decoder(keras.models.Model):
 
     def call(self, x, training=False):
         x = self.post_quant_conv(1 / 0.18215 * x)
-
         x = self.conv_in(x)
         x = self.mid(x)
 

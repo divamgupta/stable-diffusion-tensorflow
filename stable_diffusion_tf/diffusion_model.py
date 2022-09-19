@@ -53,7 +53,7 @@ class CrossAttention(keras.layers.Layer):
         assert type(inputs) is list
         if len(inputs) == 1:
             inputs = inputs + [None]
-        [x, context] = inputs
+        x, context = inputs
         context = x if context is None else context
         q, k, v = self.to_q(x), self.to_k(context), self.to_v(context)
         assert len(x.shape) == 3
@@ -71,7 +71,6 @@ class CrossAttention(keras.layers.Layer):
         attention = keras.layers.Permute((2, 1, 3))(
             attention
         )  # (bs, time, num_heads, head_size)
-
         h_ = tf.reshape(attention, (-1, x.shape[1], self.num_heads * self.head_size))
         return apply_seq(h_, self.to_out)
 
@@ -98,12 +97,10 @@ class BasicTransformerBlock(keras.layers.Layer):
         self.ff = FeedForward(dim)
 
     def call(self, inputs):
-        [x, context] = inputs
-
+        x, context = inputs
         x = self.attn1([self.norm1(x)]) + x
         x = self.attn2([self.norm2(x), context]) + x
-        x = self.ff(self.norm3(x)) + x
-        return x
+        return self.ff(self.norm3(x)) + x
 
 
 class SpatialTransformer(keras.layers.Layer):
@@ -119,7 +116,7 @@ class SpatialTransformer(keras.layers.Layer):
         self.proj_out = PaddedConv2D(n_heads * d_head, channels, 1)
 
     def call(self, inputs):
-        [x, context] = inputs
+        x, context = inputs
         b, h, w, c = x.shape
         x_in = x
         x = self.norm(x)
@@ -128,8 +125,7 @@ class SpatialTransformer(keras.layers.Layer):
         for block in self.transformer_blocks:
             x = block([x, context])
         x = tf.reshape(x, (-1, h, w, c))
-        ret = self.proj_out(x) + x_in
-        return ret
+        return self.proj_out(x) + x_in
 
 
 class Downsample(keras.layers.Layer):
@@ -160,7 +156,6 @@ class UNetModel(keras.models.Model):
             keras.activations.swish,
             keras.layers.Dense(1280),
         ]
-
         self.input_blocks = [
             [PaddedConv2D(4, 320, kernel_size=3, padding=1)],
             [ResBlock(320, 1280, 320), SpatialTransformer(320, 768, 8, 40)],
@@ -209,8 +204,7 @@ class UNetModel(keras.models.Model):
         ]
 
     def call(self, inputs, training=False):
-        # TODO: real time embedding
-        [x, t_emb, context] = inputs
+        x, t_emb, context = inputs
         emb = apply_seq(t_emb, self.time_embed)
 
         def run(x, bb):
