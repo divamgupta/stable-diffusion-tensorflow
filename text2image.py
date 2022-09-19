@@ -37,12 +37,24 @@ parser.add_argument(
     default=50,
     help="number of ddim sampling steps"
 )
+
+parser.add_argument(
+        "--fp16",
+        default=False,
+        action='store_true',
+        help="Enable mixed precission",
+)
+
 args = parser.parse_args()
+
+
+if args.fp16:
+	from tensorflow.keras import mixed_precision
+	mixed_precision.set_global_policy('mixed_float16')
 
 text_encoder, diffusion_model, decoder = get_model(512, 512, download_weights=True)
 
-
-
+	
 img = text2image(args.prompt , 
 	img_height=args.H, 
 	img_width=args.W,  
