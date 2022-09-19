@@ -40,8 +40,6 @@ class AttentionBlock(keras.layers.Layer):
 class ResnetBlock(keras.layers.Layer):
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
         self.norm1 = tfa.layers.GroupNormalization(epsilon=1e-5)
         self.conv1 = PaddedConv2D(out_channels, 3, padding=1)
         self.norm2 = tfa.layers.GroupNormalization(epsilon=1e-5)
@@ -60,37 +58,34 @@ class ResnetBlock(keras.layers.Layer):
 
 class Decoder(keras.Sequential):
     def __init__(self):
-        super().__init__([
-            keras.layers.Lambda(lambda x: 1 / 0.18215 * x),
-            PaddedConv2D(4, 1),
-            PaddedConv2D(512, 3, padding=1),
-            ResnetBlock(512, 512),
-            AttentionBlock(512),
-            ResnetBlock(512, 512),
-
-            ResnetBlock(512, 512),
-            ResnetBlock(512, 512),
-            ResnetBlock(512, 512),
-            keras.layers.UpSampling2D(size=(2, 2)),
-            PaddedConv2D(512, 3, padding=1),
-
-            ResnetBlock(512, 512),
-            ResnetBlock(512, 512),
-            ResnetBlock(512, 512),
-            keras.layers.UpSampling2D(size=(2, 2)),
-            PaddedConv2D(512, 3, padding=1),
-
-            ResnetBlock(512, 256),
-            ResnetBlock(256, 256),
-            ResnetBlock(256, 256),
-            keras.layers.UpSampling2D(size=(2, 2)),
-            PaddedConv2D(256, 3, padding=1),
-
-            ResnetBlock(256, 128),
-            ResnetBlock(128, 128),
-            ResnetBlock(128, 128),
-
-            tfa.layers.GroupNormalization(epsilon=1e-5),
-            keras.layers.Activation("swish"),
-            PaddedConv2D(3, 3, padding=1),
-        ])
+        super().__init__(
+            [
+                keras.layers.Lambda(lambda x: 1 / 0.18215 * x),
+                PaddedConv2D(4, 1),
+                PaddedConv2D(512, 3, padding=1),
+                ResnetBlock(512, 512),
+                AttentionBlock(512),
+                ResnetBlock(512, 512),
+                ResnetBlock(512, 512),
+                ResnetBlock(512, 512),
+                ResnetBlock(512, 512),
+                keras.layers.UpSampling2D(size=(2, 2)),
+                PaddedConv2D(512, 3, padding=1),
+                ResnetBlock(512, 512),
+                ResnetBlock(512, 512),
+                ResnetBlock(512, 512),
+                keras.layers.UpSampling2D(size=(2, 2)),
+                PaddedConv2D(512, 3, padding=1),
+                ResnetBlock(512, 256),
+                ResnetBlock(256, 256),
+                ResnetBlock(256, 256),
+                keras.layers.UpSampling2D(size=(2, 2)),
+                PaddedConv2D(256, 3, padding=1),
+                ResnetBlock(256, 128),
+                ResnetBlock(128, 128),
+                ResnetBlock(128, 128),
+                tfa.layers.GroupNormalization(epsilon=1e-5),
+                keras.layers.Activation("swish"),
+                PaddedConv2D(3, 3, padding=1),
+            ]
+        )

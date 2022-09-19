@@ -3,13 +3,11 @@ from tensorflow import keras
 
 
 class PaddedConv2D(keras.layers.Layer):
-    def __init__(self, out_channels, kernel_size, padding=0, stride=1):
+    def __init__(self, channels, kernel_size, padding=0, stride=1):
         super().__init__()
-        self.padding2d = keras.layers.ZeroPadding2D(
-            padding=(padding, padding), data_format=None
-        )
+        self.padding2d = keras.layers.ZeroPadding2D((padding, padding))
         self.conv2d = keras.layers.Conv2D(
-            out_channels, kernel_size, strides=(stride, stride)
+            channels, kernel_size, strides=(stride, stride)
         )
 
     def call(self, x):
