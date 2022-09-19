@@ -22,6 +22,7 @@ pip install git+https://github.com/fchollet/stable-diffusion-tensorflow
 
 ```python
 from stable_diffusion_tf.stable_diffusion import Text2Image
+from PIL import Image
 
 generator = Text2Image( 
     img_height=512,
