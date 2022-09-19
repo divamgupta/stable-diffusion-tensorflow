@@ -44,7 +44,6 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-
 generator = Text2Image(img_height=args.H, img_width=args.W, jit_compile=False)
 img = generator.generate(
     args.prompt,

@@ -194,26 +194,26 @@ class UNetModel(keras.models.Model):
         x, t_emb, context = inputs
         emb = apply_seq(t_emb, self.time_embed)
 
-        def run(x, bb):
-            if isinstance(bb, ResBlock):
-                x = bb([x, emb])
-            elif isinstance(bb, SpatialTransformer):
-                x = bb([x, context])
+        def apply(x, layer):
+            if isinstance(layer, ResBlock):
+                x = layer([x, emb])
+            elif isinstance(layer, SpatialTransformer):
+                x = layer([x, context])
             else:
-                x = bb(x)
+                x = layer(x)
             return x
 
         saved_inputs = []
         for b in self.input_blocks:
-            for bb in b:
-                x = run(x, bb)
+            for layer in b:
+                x = apply(x, layer)
             saved_inputs.append(x)
 
-        for bb in self.middle_block:
-            x = run(x, bb)
+        for layer in self.middle_block:
+            x = apply(x, layer)
 
         for b in self.output_blocks:
             x = tf.concat([x, saved_inputs.pop()], axis=-1)
-            for bb in b:
-                x = run(x, bb)
+            for layer in b:
+                x = apply(x, layer)
         return apply_seq(x, self.out)

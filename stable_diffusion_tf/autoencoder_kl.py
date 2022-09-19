@@ -38,8 +38,10 @@ class AttentionBlock(keras.layers.Layer):
 
 
 class ResnetBlock(keras.layers.Layer):
-    def __init__(self, in_channels, out_channels=None):
+    def __init__(self, in_channels, out_channels):
         super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
         self.norm1 = tfa.layers.GroupNormalization(epsilon=1e-5)
         self.conv1 = PaddedConv2D(out_channels, 3, padding=1)
         self.norm2 = tfa.layers.GroupNormalization(epsilon=1e-5)
@@ -56,55 +58,39 @@ class ResnetBlock(keras.layers.Layer):
         return self.nin_shortcut(x) + h
 
 
-class Mid(keras.layers.Layer):
-    def __init__(self, block_in):
-        super().__init__()
-        self.block_1 = ResnetBlock(block_in, block_in)
-        self.attn_1 = AttentionBlock(block_in)
-        self.block_2 = ResnetBlock(block_in, block_in)
-
-    def call(self, x):
-        return apply_seq(x, [self.block_1, self.attn_1, self.block_2])
-
-
-class Decoder(keras.models.Model):
+class Decoder(keras.Sequential):
     def __init__(self):
-        super().__init__()
-        sizes = [(128, 256), (256, 512), (512, 512), (512, 512)]
+        super().__init__([
+            keras.layers.Lambda(lambda x: 1 / 0.18215 * x),
+            PaddedConv2D(4, 1),
+            PaddedConv2D(512, 3, padding=1),
+            ResnetBlock(512, 512),
+            AttentionBlock(512),
+            ResnetBlock(512, 512),
 
-        self.post_quant_conv = PaddedConv2D(4, 1)
-        self.conv_in = PaddedConv2D(512, 3, padding=1)
-        self.mid = Mid(512)
-        self.upp = keras.layers.UpSampling2D(size=(2, 2))
+            ResnetBlock(512, 512),
+            ResnetBlock(512, 512),
+            ResnetBlock(512, 512),
+            keras.layers.UpSampling2D(size=(2, 2)),
+            PaddedConv2D(512, 3, padding=1),
 
-        arr = []
-        for i, s in enumerate(sizes):
-            arr.append(
-                {
-                    "block": [
-                        ResnetBlock(s[1], s[0]),
-                        ResnetBlock(s[0], s[0]),
-                        ResnetBlock(s[0], s[0]),
-                    ]
-                }
-            )
-            if i != 0:
-                arr[-1]["upsample"] = {"conv": PaddedConv2D(s[0], 3, padding=1)}
-        self.up = arr
+            ResnetBlock(512, 512),
+            ResnetBlock(512, 512),
+            ResnetBlock(512, 512),
+            keras.layers.UpSampling2D(size=(2, 2)),
+            PaddedConv2D(512, 3, padding=1),
 
-        self.norm_out = tfa.layers.GroupNormalization(epsilon=1e-5)
-        self.conv_out = PaddedConv2D(3, 3, padding=1)
+            ResnetBlock(512, 256),
+            ResnetBlock(256, 256),
+            ResnetBlock(256, 256),
+            keras.layers.UpSampling2D(size=(2, 2)),
+            PaddedConv2D(256, 3, padding=1),
 
-    def call(self, x, training=False):
-        x = self.post_quant_conv(1 / 0.18215 * x)
-        x = self.conv_in(x)
-        x = self.mid(x)
+            ResnetBlock(256, 128),
+            ResnetBlock(128, 128),
+            ResnetBlock(128, 128),
 
-        for l in self.up[::-1]:
-            for b in l["block"]:
-                x = b(x)
-            if "upsample" in l:
-                x = self.upp(x)
-                x = l["upsample"]["conv"](x)
-
-        return self.conv_out(keras.activations.swish(self.norm_out(x)))
+            tfa.layers.GroupNormalization(epsilon=1e-5),
+            keras.layers.Activation("swish"),
+            PaddedConv2D(3, 3, padding=1),
+        ])

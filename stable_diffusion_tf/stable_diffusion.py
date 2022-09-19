@@ -167,7 +167,7 @@ def get_models(img_height, img_width, download_weights=True):
     )
     decoder_weights_fpath = keras.utils.get_file(
         origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/decoder.h5",
-        file_hash="0e2c7e4bbf32962daa37ff3b744cf2503f000ead2c8ffaa412e6cf5bec066b6b",
+        file_hash="6d3c5ba91d5cc2b134da881aaa157b2d2adc648e5625560e3ed199561d0e39d5",
     )
 
     text_encoder.load_weights(text_encoder_weights_fpath)
