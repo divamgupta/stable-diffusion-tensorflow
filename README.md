@@ -84,9 +84,10 @@ img = generator.generate(
 Image.fromarray(img[0]).save("output.png")
 ```
 
-### Using virtualenv from the git repo
+### Using `text2image.py` from the git repo
 
-To generate images from a text prompt use:
+Assuming you have installed the required packages, 
+you can generate images from a text prompt using:
 
 ```bash
 python text2image.py --prompt="An astronaut riding a horse"
