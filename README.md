@@ -16,7 +16,13 @@ created by @divamgupta. The weights were ported from the original implementation
 python text2image.py --prompt="An astronaut riding a horse"
 ```
 
-3) Using the python interface:
+3) Using the WebUI :
+
+```
+python webui.py
+```
+
+4) Using the python interface:
 
 ```
 pip install git+https://github.com/fchollet/stable-diffusion-tensorflow
@@ -26,7 +32,7 @@ pip install git+https://github.com/fchollet/stable-diffusion-tensorflow
 from stable_diffusion_tf.stable_diffusion import Text2Image
 from PIL import Image
 
-generator = Text2Image( 
+generator = Text2Image(
     img_height=512,
     img_width=512,
     jit_compile=False,
@@ -41,7 +47,7 @@ img = generator.generate(
 Image.fromarray(img[0]).save("output.png")
 ```
 
-## Example outputs 
+## Example outputs
 
 The following outputs have been generated using the this implementation:
 
