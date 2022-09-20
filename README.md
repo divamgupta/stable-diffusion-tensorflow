@@ -1,10 +1,8 @@
 # Stable Diffusion in TensorFlow / Keras
 
-A Keras / Tensorflow implementation of Stable Diffusion.
+A Keras / Tensorflow implementation of Stable Diffusion. 
 
-This is a fork of [stable-diffusion-tensorflow](https://github.com/divamgupta/stable-diffusion-tensorflow)
-created by @divamgupta. The weights were ported from the original implementation.
-
+The weights were ported from the original implementation.
 
 ## Usage
 
@@ -19,7 +17,7 @@ python text2image.py --prompt="An astronaut riding a horse"
 3) Using the python interface:
 
 ```
-pip install git+https://github.com/fchollet/stable-diffusion-tensorflow
+pip install git+https://github.com/divamgupta/stable-diffusion-tensorflow
 ```
 
 ```python
@@ -43,7 +41,7 @@ Image.fromarray(img[0]).save("output.png")
 
 ## Example outputs 
 
-The following outputs have been generated using the this implementation:
+The following outputs have been generated using this implementation:
 
 1) *A epic and beautiful rococo werewolf drinking coffee, in a burning coffee shop. ultra-detailed. anime, pixiv, uhd 8k cryengine, octane render*
 
