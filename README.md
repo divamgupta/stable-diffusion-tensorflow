@@ -26,42 +26,37 @@ Install using pip with the git repo:
 pip install git+https://github.com/divamgupta/stable-diffusion-tensorflow
 ```
 
-### Installing using the repo
+### Using a virtual environment with *virtualenv*
 
-Download the repo, either by downloading the
+1) Download the repo, either by downloading the 
    [zip](https://github.com/divamgupta/stable-diffusion-tensorflow/archive/refs/heads/master.zip)
-   file or by cloning the repo with git:
+   file or by cloning the repo with git: 
 
     ```bash
     git clone git@github.com:divamgupta/stable-diffusion-tensorflow.git
     ```
 
-#### Using pip without a virtual environment
-
-Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
-
-```bash
-pip install -r requirements.txt
-```
-
-#### Using a virtual environment with *virtualenv*
-
-1) Create your virtual environment for `python3`:
+2) Create your virtual environment for `python3`:
 
     ```bash
     python3 -m venv venv
     ```
-   
-2) Activate your virtualenv:
+
+3) Activate your virtualenv:
 
     ```bash
     source venv/bin/activate
     ```
 
-3) Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
+4) Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
 
     ```bash
     pip install -r requirements.txt
+    ```
+    or
+
+    ```bash
+    pip install -r requirements_m1.txt
     ```
 
 ## Usage
