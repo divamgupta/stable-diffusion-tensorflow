@@ -1,3 +1,4 @@
+from tensorflow import keras
 from stable_diffusion_tf.stable_diffusion import Text2Image
 import argparse
 from PIL import Image
@@ -46,10 +47,23 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--seed", type=int, help="optionally specify a seed integer for reproducible results"
+    "--seed",
+    type=int,
+    help="optionally specify a seed integer for reproducible results",
+)
+
+parser.add_argument(
+    "--mp",
+    default=False,
+    action="store_true",
+    help="Enable mixed precision (fp16 computation)",
 )
 
 args = parser.parse_args()
+
+if args.mp:
+    print("Using mixed precision.")
+    keras.mixed_precision.set_global_policy("mixed_float16")
 
 generator = Text2Image(img_height=args.H, img_width=args.W, jit_compile=False)
 img = generator.generate(
@@ -58,7 +72,7 @@ img = generator.generate(
     unconditional_guidance_scale=args.scale,
     temperature=1,
     batch_size=1,
-    seed=args.seed
+    seed=args.seed,
 )
 Image.fromarray(img[0]).save(args.output)
 print(f"saved at {args.output}")
