@@ -18,7 +18,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
 
 ## Installation
 
-#### Install as a python package
+### Install as a python package
 
 Install using pip with the git repo:
 
