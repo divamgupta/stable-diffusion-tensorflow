@@ -6,7 +6,7 @@ The weights were ported from the original implementation.
 
 ## Usage
 
-1) Try it out with [this GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK).
+1) Try it out with [one of the collab notebooks](#resources).
 
 2) Using the command line :
 
@@ -56,6 +56,13 @@ The following outputs have been generated using this implementation:
 3) *A vision of paradise, Unreal Engine*
 
 ![a](https://user-images.githubusercontent.com/1890549/190841886-239406ea-72cb-4570-8f4c-fcd074a7ad7f.png)
+
+
+## Resources
+
+1) [GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK)
+2) [GPU Colab + Mixed Precision](https://colab.research.google.com/drive/15mQgITh3e9HQMNys0zR8JN4R2vp06d-N)
+3) [TPU Colab](https://colab.research.google.com/drive/17zQOm_2Iu6pcP8otT-v6rx0D-pKgfaLm)
 
 
 ## References
