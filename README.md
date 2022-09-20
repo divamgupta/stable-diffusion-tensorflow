@@ -2,8 +2,7 @@
 
 A Keras / Tensorflow implementation of Stable Diffusion.
 
-This is a fork of [stable-diffusion-tensorflow](https://github.com/divamgupta/stable-diffusion-tensorflow)
-created by @divamgupta. The weights were ported from the original implementation.
+The weights were ported from the original implementation.
 
 
 ## Usage
