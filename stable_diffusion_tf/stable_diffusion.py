@@ -1,6 +1,8 @@
 import numpy as np
 from tqdm import tqdm
 import math
+import random
+import sys
 
 import tensorflow as tf
 from tensorflow import keras
@@ -59,6 +61,9 @@ class Text2Image:
             [self.unconditional_tokens, pos_ids]
         )
         timesteps = np.arange(1, 1000, 1000 // num_steps)
+        # Create a random seed if one is not provided
+        if seed is None:
+            seed = random.randint(1000, sys.maxsize)
         latent, alphas, alphas_prev = self.get_starting_parameters(
             timesteps, batch_size, seed
         )
@@ -83,7 +88,7 @@ class Text2Image:
         # Decoding stage
         decoded = self.decoder.predict_on_batch(latent)
         decoded = ((decoded + 1) / 2) * 255
-        return np.clip(decoded, 0, 255).astype("uint8")
+        return (seed, np.clip(decoded, 0, 255).astype("uint8"))
 
     def timestep_embedding(self, timesteps, dim=320, max_period=10000):
         half = dim // 2

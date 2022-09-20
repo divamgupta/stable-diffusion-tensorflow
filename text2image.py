@@ -32,7 +32,7 @@ if not isdir('output'):
 
 generator = Text2Image(img_height=args.height, img_width=args.width, jit_compile=False)
 
-images = generator.generate(
+seed, images = generator.generate(
     args.prompt,
     num_steps=args.steps,
     unconditional_guidance_scale=args.scale,
@@ -40,6 +40,7 @@ images = generator.generate(
     batch_size=args.copies,
     seed=args.seed,
 )
+print(f'The SEED for this batch is: {seed}')
 # Save results
 for img in images:
     i = 0
