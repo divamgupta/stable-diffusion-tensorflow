@@ -1,52 +1,49 @@
 import tensorflow as tf
+from tensorflow import keras
+
+
+class PaddedConv2D(keras.layers.Layer):
+    def __init__(self, channels, kernel_size, padding=0, stride=1):
+        super().__init__()
+        self.padding2d = keras.layers.ZeroPadding2D((padding, padding))
+        self.conv2d = keras.layers.Conv2D(
+            channels, kernel_size, strides=(stride, stride)
+        )
+
+    def call(self, x):
+        x = self.padding2d(x)
+        return self.conv2d(x)
+
+
+class GEGLU(keras.layers.Layer):
+    def __init__(self, dim_out):
+        super().__init__()
+        self.proj = keras.layers.Dense(dim_out * 2)
+        self.dim_out = dim_out
+
+    def call(self, x):
+        xp = self.proj(x)
+        x, gate = xp[..., : self.dim_out], xp[..., self.dim_out :]
+        return x * gelu(gate)
+
+
+def gelu(x):
+    tanh_res = keras.activations.tanh(x * 0.7978845608 * (1 + 0.044715 * (x**2)))
+    return 0.5 * x * (1 + tanh_res)
 
 
 def quick_gelu(x):
-    return x * tf.sigmoid(x * 1.702) 
+    return x * tf.sigmoid(x * 1.702)
 
 
-def get_conv2d(in_channels, out_channels, kernel_size ,padding=0 ,stride=1):    
-    return tf.keras.models.Sequential([
-        tf.keras.layers.ZeroPadding2D(
-            padding=(padding, padding), data_format=None 
-        ),
-        tf.keras.layers.Conv2D(
-            out_channels,
-            kernel_size,
-            strides=(stride, stride )) 
-    ])
-   
-
-def apply_seq(x , layers):
+def apply_seq(x, layers):
     for l in layers:
         x = l(x)
     return x
 
-def td_dot(a , b ):
-    assert len(a.shape) == 4
-    assert len(a.shape) == 4
-    assert a.shape[0] == b.shape[0]
-    assert b.shape[1] == a.shape[1]
-    aa = tf.reshape(a , (-1 , a.shape[2] , a.shape[3]))
-    bb = tf.reshape(b , (-1 , b.shape[2] , b.shape[3]))
-    cc = tf.keras.backend.batch_dot(aa , bb )
-    c = tf.reshape(cc , (-1 , a.shape[1] , cc.shape[1] , cc.shape[2]))
-    return c 
 
-
-def gelu(self):
-    return 0.5 * self * (1 + tf.keras.activations.tanh(self * 0.7978845608 * (1 + 0.044715 * self * self)))
-
-class GEGLU(tf.keras.layers.Layer):
-    def __init__(self, dim_in, dim_out):
-        super(GEGLU, self).__init__()
-        
-        self.proj = tf.keras.layers.Dense( dim_out * 2 )
-        self.dim_out = dim_out
-
-    def __call__(self, x):
-        xp = self.proj(x)
-        x, gate = xp[... , :self.dim_out ] , xp[..., self.dim_out:]
-        ans = x * gelu(gate)
-        
-        return ans
+def td_dot(a, b):
+    aa = tf.reshape(a, (-1, a.shape[2], a.shape[3]))
+    bb = tf.reshape(b, (-1, b.shape[2], b.shape[3]))
+    cc = keras.backend.batch_dot(aa, bb)
+    return tf.reshape(cc, (-1, a.shape[1], cc.shape[1], cc.shape[2]))
