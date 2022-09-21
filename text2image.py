@@ -83,9 +83,13 @@ if(args.batch > 1):
     Image.fromarray(img[0]).save(args.output)
     print(f"saved at {args.output}")
 else:
+    split_filename = args.output.split(".")
+    filename = split_filename[0:-1]
+    extension = split_filename[-1]
+    generate_filename = lambda x: f"{filename}-{x}.{extension}"
     for i in range(args.batch):
-        filename = f"{i}-args.output"
+        filename = generate_filename(i + 1)
         Image.fromarray(img[i]).save(args.output)
     
-    print(f"saved {args.batch} images at {args.output}")
+    print(f"saved {args.batch} images as {generate_filename(f"1, {args.batch + 1}")}")
 
