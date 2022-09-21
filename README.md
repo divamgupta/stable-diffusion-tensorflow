@@ -35,7 +35,7 @@ img = generator.generate(
     num_steps=50,
     unconditional_guidance_scale=7.5,
     temperature=1,
-	batch_size=1,
+    batch_size=1,
 )
 Image.fromarray(img[0]).save("output.png")
 ```
