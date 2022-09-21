@@ -8,6 +8,7 @@ The weights were ported from the original implementation.
 
 The easiest way to try it out is to use one of the Colab notebooks:
 
+
 - [GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK)
 - [GPU Colab + Mixed Precision](https://colab.research.google.com/drive/15mQgITh3e9HQMNys0zR8JN4R2vp06d-N)
   - ~10s generation time per image (512x512) on default Colab GPU without drop in quality
@@ -15,6 +16,9 @@ The easiest way to try it out is to use one of the Colab notebooks:
 - [TPU Colab](https://colab.research.google.com/drive/17zQOm_2Iu6pcP8otT-v6rx0D-pKgfaLm).
   - Slower than GPU for single-image generation, faster for large batch of 8+ images
     ([source](https://twitter.com/fchollet/status/1572004717362028546)).
+- [GPU Colab with Gradio](https://colab.research.google.com/drive/1ANTUur1MF9DKNd5-BTWhbWa7xUBfCWyI)
+
+
 
 ## Installation
 
