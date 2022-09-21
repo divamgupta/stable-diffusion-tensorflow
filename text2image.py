@@ -79,17 +79,19 @@ img = generator.generate(
     seed=args.seed,
 )
 
-if(args.batch > 1):
-    Image.fromarray(img[0]).save(args.output)
-    print(f"saved at {args.output}")
+if(args.batch <= 1):
+   Image.fromarray(img[0]).save(args.output)
+   print(f"saved at {args.output}")
 else:
     split_filename = args.output.split(".")
-    filename = split_filename[0:-1]
+    filename = ''.join(split_filename[0:-1])
     extension = split_filename[-1]
-    generate_filename = lambda x: f"{filename}-{x}.{extension}"
-    for i in range(args.batch):
-        filename = generate_filename(i + 1)
-        Image.fromarray(img[i]).save(args.output)
+    def generate_filename(suffix):
+        return f"{filename}-{suffix}.{extension}"
     
-    print(f"saved {args.batch} images as {generate_filename(f"1, {args.batch + 1}")}")
+    for i in range(args.batch):
+        generated_filename = generate_filename(i + 1)
+        Image.fromarray(img[i]).save(generated_filename)
+    
+    print(f"saved {args.batch} images as {generate_filename(f'[{1}, {args.batch}]')}")
 
