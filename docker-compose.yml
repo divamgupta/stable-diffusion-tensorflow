@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  stable-diffusion-tf:
+    image: stable-diffusion-tf
+    build: .
+    volumes:
+      - keras:/root/.keras
+    ports:
+      - "7860:7860"
+    command: python3 webui.py
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+
+volumes:
+  keras:
