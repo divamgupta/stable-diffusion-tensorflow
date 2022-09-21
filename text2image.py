@@ -86,12 +86,9 @@ else:
     split_filename = args.output.split(".")
     filename = ''.join(split_filename[0:-1])
     extension = split_filename[-1]
-    def generate_filename(suffix):
-        return f"{filename}-{suffix}.{extension}"
     
     for i in range(args.batch):
-        generated_filename = generate_filename(i + 1)
+        generated_filename = f"{filename}-{i+1}.{extension}"
         Image.fromarray(img[i]).save(generated_filename)
-    
-    print(f"saved {args.batch} images as {generate_filename(f'[{1}, {args.batch}]')}")
+        print(f"saved at {generated_filename}")
 
