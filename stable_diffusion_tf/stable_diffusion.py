@@ -130,7 +130,7 @@ class Text2Image:
         n_w = self.img_width // 8
         alphas = [_ALPHAS_CUMPROD[t] for t in timesteps]
         alphas_prev = [1.0] + alphas[:-1]
-        latent = tf.random.normal((batch_size, n_h, n_w, 4), seed=seed)
+        latent = np.random.RandomState(seed).normal(size=(batch_size, n_h, n_w, 4))
         return latent, alphas, alphas_prev
 
 
@@ -157,7 +157,7 @@ def get_models(img_height, img_width, download_weights=True):
     latent = keras.layers.Input((n_h, n_w, 4))
     decoder = Decoder()
     decoder = keras.models.Model(latent, decoder(latent))
-    
+
     if download_weights:
         text_encoder_weights_fpath = keras.utils.get_file(
             origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/text_encoder.h5",
