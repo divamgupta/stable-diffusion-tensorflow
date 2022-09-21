@@ -7,7 +7,7 @@ The weights were ported from the original implementation.
 
 ## Usage
 
-1) Try it out with [this GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK).
+1) Try it out with [this GPU Colab](https://colab.research.google.com/drive/1ANTUur1MF9DKNd5-BTWhbWa7xUBfCWyI) with [Gradio](https://github.com/gradio-app/gradio) Demo.
 
 2) Using the command line :
 
