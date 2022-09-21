@@ -47,6 +47,10 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--batch", type=int, default=1, help="number of images to generate"
+)
+
+parser.add_argument(
     "--seed",
     type=int,
     help="optionally specify a seed integer for reproducible results",
@@ -71,8 +75,17 @@ img = generator.generate(
     num_steps=args.steps,
     unconditional_guidance_scale=args.scale,
     temperature=1,
-    batch_size=1,
+    batch_size=args.batch,
     seed=args.seed,
 )
-Image.fromarray(img[0]).save(args.output)
-print(f"saved at {args.output}")
+
+if(args.batch > 1):
+    Image.fromarray(img[0]).save(args.output)
+    print(f"saved at {args.output}")
+else:
+    for i in range(args.batch):
+        filename = f"{i}-args.output"
+        Image.fromarray(img[i]).save(args.output)
+    
+    print(f"saved {args.batch} images at {args.output}")
+
