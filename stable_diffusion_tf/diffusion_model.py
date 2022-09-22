@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 import tensorflow_addons as tfa
 
-from .layers import PaddedConv2D, apply_seq, td_dot, GEGLU
+from .layers import PaddedConv2D, apply_seq, GEGLU
 
 
 class ResBlock(keras.layers.Layer):
@@ -63,9 +63,9 @@ class CrossAttention(keras.layers.Layer):
         k = keras.layers.Permute((2, 3, 1))(k)  # (bs, num_heads, head_size, time)
         v = keras.layers.Permute((2, 1, 3))(v)  # (bs, num_heads, time, head_size)
 
-        score = td_dot(q, k) * self.scale
+        score = tf.matmul(q, k) * self.scale
         weights = keras.activations.softmax(score)  # (bs, num_heads, time, time)
-        attention = td_dot(weights, v)
+        attention = tf.matmul(weights, v)
         attention = keras.layers.Permute((2, 1, 3))(
             attention
         )  # (bs, time, num_heads, head_size)

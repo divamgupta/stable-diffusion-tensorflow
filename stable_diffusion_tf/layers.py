@@ -41,9 +41,3 @@ def apply_seq(x, layers):
         x = l(x)
     return x
 
-
-def td_dot(a, b):
-    aa = tf.reshape(a, (-1, a.shape[2], a.shape[3]))
-    bb = tf.reshape(b, (-1, b.shape[2], b.shape[3]))
-    cc = keras.backend.batch_dot(aa, bb)
-    return tf.reshape(cc, (-1, a.shape[1], cc.shape[1], cc.shape[2]))
