@@ -31,24 +31,29 @@ class Text2Image:
 
     def generate(
         self,
-        prompt,
-        batch_size=1,
+        prompts,
+        seeds,
         num_steps=25,
         unconditional_guidance_scale=7.5,
         temperature=1,
-        seed=None,
     ):
+        # Infer batch size from #prompts
+        batch_size = len(prompts)
+
         # Tokenize prompt (i.e. starting context)
-        inputs = self.tokenizer.encode(prompt)
-        assert len(inputs) < 77, "Prompt is too long (should be < 77 tokens)"
-        phrase = inputs + [49407] * (77 - len(inputs))
-        phrase = np.array(phrase)[None].astype("int32")
-        phrase = np.repeat(phrase, batch_size, axis=0)
+        phrases = []
+        for prompt in prompts:
+            inputs = self.tokenizer.encode(prompt)
+            assert len(inputs) < 77, "Prompt is too long (should be < 77 tokens)"
+            phrase = inputs + [49407] * (77 - len(inputs))
+            phrase = np.array(phrase).astype("int32")
+            phrases.append(phrase)
+        phrases = np.stack(phrases)
 
         # Encode prompt tokens (and their positions) into a "context vector"
         pos_ids = np.array(list(range(77)))[None].astype("int32")
         pos_ids = np.repeat(pos_ids, batch_size, axis=0)
-        context = self.text_encoder.predict_on_batch([phrase, pos_ids])
+        context = self.text_encoder.predict_on_batch([phrases, pos_ids])
 
         # Encode unconditional tokens (and their positions into an
         # "unconditional context vector"
@@ -60,7 +65,7 @@ class Text2Image:
         )
         timesteps = np.arange(1, 1000, 1000 // num_steps)
         latent, alphas, alphas_prev = self.get_starting_parameters(
-            timesteps, batch_size, seed
+            timesteps, batch_size, seeds
         )
 
         # Diffusion stage
@@ -77,7 +82,7 @@ class Text2Image:
             )
             a_t, a_prev = alphas[index], alphas_prev[index]
             latent, pred_x0 = self.get_x_prev_and_pred_x0(
-                latent, e_t, index, a_t, a_prev, temperature, seed
+                latent, e_t, index, a_t, a_prev, temperature, seeds
             )
 
         # Decoding stage
@@ -114,23 +119,26 @@ class Text2Image:
             latent - unconditional_latent
         )
 
-    def get_x_prev_and_pred_x0(self, x, e_t, index, a_t, a_prev, temperature, seed):
+    def get_x_prev_and_pred_x0(self, x, e_t, index, a_t, a_prev, _temperature, _seeds):
         sigma_t = 0
         sqrt_one_minus_at = math.sqrt(1 - a_t)
         pred_x0 = (x - sqrt_one_minus_at * e_t) / math.sqrt(a_t)
 
         # Direction pointing to x_t
         dir_xt = math.sqrt(1.0 - a_prev - sigma_t**2) * e_t
-        noise = sigma_t * tf.random.normal(x.shape, seed=seed) * temperature
+        #noise = sigma_t * tf.random.normal(x.shape, seed=seed) * temperature   # not currently used
         x_prev = math.sqrt(a_prev) * pred_x0 + dir_xt
         return x_prev, pred_x0
 
-    def get_starting_parameters(self, timesteps, batch_size, seed):
+    def get_starting_parameters(self, timesteps, batch_size, seeds):
         n_h = self.img_height // 8
         n_w = self.img_width // 8
         alphas = [_ALPHAS_CUMPROD[t] for t in timesteps]
         alphas_prev = [1.0] + alphas[:-1]
-        latent = tf.random.normal((batch_size, n_h, n_w, 4), seed=seed)
+        latent = []
+        for seed in seeds:
+            latent.append(np.random.RandomState(seed).normal(size=(n_h, n_w, 4)))
+        latent = np.stack(latent)
         return latent, alphas, alphas_prev
 
 
@@ -157,7 +165,7 @@ def get_models(img_height, img_width, download_weights=True):
     latent = keras.layers.Input((n_h, n_w, 4))
     decoder = Decoder()
     decoder = keras.models.Model(latent, decoder(latent))
-    
+
     if download_weights:
         text_encoder_weights_fpath = keras.utils.get_file(
             origin="https://huggingface.co/fchollet/stable-diffusion/resolve/main/text_encoder.h5",

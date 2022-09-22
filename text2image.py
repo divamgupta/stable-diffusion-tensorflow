@@ -59,20 +59,31 @@ parser.add_argument(
     help="Enable mixed precision (fp16 computation)",
 )
 
+parser.add_argument(
+    "--batch-size",
+    type=int,
+    default=1,
+    help="number of prompt/seed images to generate",
+)
+
 args = parser.parse_args()
 
 if args.mp:
     print("Using mixed precision.")
     keras.mixed_precision.set_global_policy("mixed_float16")
 
+prompts = [args.prompt for _ in range(args.batch_size)]
+seeds = [args.seed for _ in range(args.batch_size)]
+
 generator = Text2Image(img_height=args.H, img_width=args.W, jit_compile=False)
-img = generator.generate(
-    args.prompt,
+imgs = generator.generate(
+    prompts,
+    seeds,
     num_steps=args.steps,
     unconditional_guidance_scale=args.scale,
     temperature=1,
-    batch_size=1,
-    seed=args.seed,
 )
-Image.fromarray(img[0]).save(args.output)
-print(f"saved at {args.output}")
+for i, img in enumerate(imgs):
+    fname = f"{i:02d}.{args.output}"
+    Image.fromarray(img).save(fname)
+    print(f"saved at {fname}")
