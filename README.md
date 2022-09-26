@@ -39,9 +39,7 @@ pip install -r requirements.txt
 
 There are 2 ways to run the code.
 
-1. Using the Python interface
-
-If you installed the package, you can use it as follows:
+1. Using the Python interface. If you installed the package, you can use it as follows:
 
 ```python
 from stable_diffusion_tf.stable_diffusion import Text2Image
@@ -63,9 +61,6 @@ Image.fromarray(img[0]).save("output.png")
 ```
 
 2. Using command line interface as follows:
-
-Assuming you have installed the required packages, 
-you can generate images from a text prompt using:
 
 ```bash
 python text2image.py --prompt="An astronaut riding a horse"
