@@ -19,53 +19,21 @@ The easiest way to try it out is to use one of the Colab notebooks:
 
 
 
-## Installation
+## Requirements
 
-### Install as a python package
+It's recommened to craete [conda](https://docs.conda.io/en/latest/) environment.
 
-Install using pip with the git repo:
-
-```bash
-pip install git+https://github.com/divamgupta/stable-diffusion-tensorflow
+```
+conda env create -n std_model
+conda activate std_model
 ```
 
-### Installing using the repo
+Next, clone the repo and install necessary packages from `requirements.txt` or the `requirements_m1.txt` file.
 
-Download the repo, either by downloading the
-[zip](https://github.com/divamgupta/stable-diffusion-tensorflow/archive/refs/heads/master.zip)
-file or by cloning the repo with git:
-
-```bash
-git clone git@github.com:divamgupta/stable-diffusion-tensorflow.git
 ```
-
-#### Using pip without a virtual environment
-
-Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
-
-```bash
+git clone https://github.com/divamgupta/stable-diffusion-tensorflow.git
 pip install -r requirements.txt
 ```
-
-#### Using a virtual environment with *virtualenv*
-
-1) Create your virtual environment for `python3`:
-
-    ```bash
-    python3 -m venv venv
-    ```
-   
-2) Activate your virtualenv:
-
-    ```bash
-    source venv/bin/activate
-    ```
-
-3) Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
-
-    ```bash
-    pip install -r requirements.txt
-    ```
 
 ## Usage
 
