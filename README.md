@@ -18,7 +18,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
   - Slower than GPU for single-image generation, faster for large batch of 8+ images
     ([source](https://twitter.com/fchollet/status/1572004717362028546)).
 - [GPU Colab with Gradio](https://colab.research.google.com/drive/1ANTUur1MF9DKNd5-BTWhbWa7xUBfCWyI)
-- [Multi-GPU Inference](https://colab.research.google.com/drive/1CdWmT9CNF_L2XjCERv8gX8cq-PgzT2qZ?usp=sharing) - [KerasCV](https://github.com/keras-team/keras-cv) API.
+- [Multi-GPU Inference](https://colab.research.google.com/drive/1CdWmT9CNF_L2XjCERv8gX8cq-PgzT2qZ?usp=sharing) - with [KerasCV](https://github.com/keras-team/keras-cv) API.
 
 
 
