@@ -1,5 +1,9 @@
 # Stable Diffusion in TensorFlow / Keras
 
+
+![output](https://user-images.githubusercontent.com/17668390/192362513-7161bc59-aee8-4129-a8de-e5aef305f344.png)
+
+
 **Stable Diffusion** is a latent text-to-image diffusion model. This is an unofficial implementation in `TensorFlow 2 (Keras)`. The weights were ported from the [original](https://github.com/CompVis/stable-diffusion) implementation. Stable Diffusion model is now available in [KerasCV](https://github.com/keras-team/keras-cv).
 
 ## Quick Start
@@ -75,19 +79,26 @@ Check out the `text2image.py` file for more options, including image size, numbe
 
 The following outputs have been generated using this implementation:
 
-1) *A epic and beautiful rococo werewolf drinking coffee, in a burning coffee shop. ultra-detailed. anime, pixiv, uhd 8k cryengine, octane render*
+> "Ultra high definiton of an alien cat seahorse fursona, smooth edege, soften" \
+  " autistic graphic designer, attractive fluffy".
 
-![a](https://user-images.githubusercontent.com/1890549/190841598-3d0b9bd1-d679-4c8d-bd5e-b1e24397b5c8.png)
-
-
-2) *Spider-Gwen Gwen-Stacy Skyscraper Pink White Pink-White Spiderman Photo-realistic 4K*
-
-![a](https://user-images.githubusercontent.com/1890549/190841999-689c9c38-ece4-46a0-ad85-f459ec64c5b8.png)
+![output](https://user-images.githubusercontent.com/17668390/192363741-c268b2d3-72b1-4ca9-b5e2-46f96a9365ae.png)
 
 
-3) *A vision of paradise, Unreal Engine*
+> "A epic and beautiful rococo werewolf drinking coffee, in a burning coffee shop. ultra-detailed."\
+  " anime, pixiv, uhd 8k cryengine, octane render, smooth edege, soften."
 
-![a](https://user-images.githubusercontent.com/1890549/190841886-239406ea-72cb-4570-8f4c-fcd074a7ad7f.png)
+
+![output (1)](https://user-images.githubusercontent.com/17668390/192364449-ed2cf988-bdb1-42d6-a544-96f7639e2928.png)
+
+> "Ultra high definiton realistic alien city, ambient light, smooth edege, soften, parallel levitation world" \
+  " over the pretty jungle highly detailed, vibrant, style ultra realistic, Sci-Fi "
+
+![output (2)](https://user-images.githubusercontent.com/17668390/192364789-079eb6e8-f9a6-411f-b631-431d702f41e0.png)
+
+> "3d illustration painting of under the sea steampunk planet, soften"
+
+![output (3)](https://user-images.githubusercontent.com/17668390/192365102-eb53f6ca-2f58-4077-8225-0ca2e22e1b65.png)
 
 
 ## References
