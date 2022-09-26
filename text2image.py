@@ -2,6 +2,7 @@ from tensorflow import keras
 from stable_diffusion_tf.stable_diffusion import Text2Image
 import argparse
 from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 
 parser = argparse.ArgumentParser()
 
@@ -74,5 +75,7 @@ img = generator.generate(
     batch_size=1,
     seed=args.seed,
 )
-Image.fromarray(img[0]).save(args.output)
+pnginfo = PngInfo()
+pnginfo.add_text('prompt', args.prompt)
+Image.fromarray(img[0]).save(args.output, pnginfo=pnginfo)
 print(f"saved at {args.output}")
