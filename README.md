@@ -1,6 +1,9 @@
 # Stable Diffusion in TensorFlow / Keras
 
-Stable Diffusion is a latent text-to-image diffusion model. This is an unofficial implementation in `TensorFlow 2 (Keras)` of Stable Diffusion model. The weights were ported from the [original](https://github.com/CompVis/stable-diffusion) implementation.
+
+
+
+**Stable Diffusion** is a latent text-to-image diffusion model. This is an unofficial implementation in `TensorFlow 2 (Keras)`. The weights were ported from the [original](https://github.com/CompVis/stable-diffusion) implementation. Stable Diffusion model is now available in [KerasCV](https://github.com/keras-team/keras-cv).
 
 ## Quick Start
 
