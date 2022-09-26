@@ -71,7 +71,7 @@ python text2image.py --prompt="An astronaut riding a horse"
 
 Check out the `text2image.py` file for more options, including image size, number of steps, etc.
 
-## Example outputs 
+## Text-to-Image with Stable Diffusion
 
 The following outputs have been generated using this implementation:
 
