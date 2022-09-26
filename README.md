@@ -24,7 +24,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
 
 ## Requirements
 
-It's recommened to craete [conda](https://docs.conda.io/en/latest/) environment.
+It's recommened to create [conda](https://docs.conda.io/en/latest/) environment.
 
 ```
 conda env create -n std_model
