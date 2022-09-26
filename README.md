@@ -1,10 +1,8 @@
 # Stable Diffusion in TensorFlow / Keras
 
-A Keras / Tensorflow implementation of Stable Diffusion. 
+Stable Diffusion is a latent text-to-image diffusion model. This is an unofficial implementation in `TensorFlow 2 (Keras)` of Stable Diffusion model. The weights were ported from the [original](https://github.com/CompVis/stable-diffusion) implementation.
 
-The weights were ported from the original implementation.
-
-## Colab Notebooks
+## Quick Start
 
 The easiest way to try it out is to use one of the Colab notebooks:
 
@@ -17,6 +15,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
   - Slower than GPU for single-image generation, faster for large batch of 8+ images
     ([source](https://twitter.com/fchollet/status/1572004717362028546)).
 - [GPU Colab with Gradio](https://colab.research.google.com/drive/1ANTUur1MF9DKNd5-BTWhbWa7xUBfCWyI)
+- [Multi-GPU Inference](https://colab.research.google.com/drive/1CdWmT9CNF_L2XjCERv8gX8cq-PgzT2qZ?usp=sharing)
 
 
 
