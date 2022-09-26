@@ -1,8 +1,5 @@
 # Stable Diffusion in TensorFlow / Keras
 
-
-
-
 **Stable Diffusion** is a latent text-to-image diffusion model. This is an unofficial implementation in `TensorFlow 2 (Keras)`. The weights were ported from the [original](https://github.com/CompVis/stable-diffusion) implementation. Stable Diffusion model is now available in [KerasCV](https://github.com/keras-team/keras-cv).
 
 ## Quick Start
@@ -40,7 +37,9 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Using the Python interface
+There are 2 ways to run the code.
+
+1. Using the Python interface
 
 If you installed the package, you can use it as follows:
 
@@ -63,20 +62,16 @@ img = generator.generate(
 Image.fromarray(img[0]).save("output.png")
 ```
 
-### Using `text2image.py` from the git repo
+2. Using command line interface as follows:
 
 Assuming you have installed the required packages, 
 you can generate images from a text prompt using:
 
 ```bash
 python text2image.py --prompt="An astronaut riding a horse"
-```
 
-The generated image will be named `output.png` on the root of the repo.
-If you want to use a different name, use the `--output` flag.
-
-```bash
-python text2image.py --prompt="An astronaut riding a horse" --output="my_image.png"
+# specify output path
+# python text2image.py --prompt="An astronaut riding a horse" --output="my_image.png"
 ```
 
 Check out the `text2image.py` file for more options, including image size, number of steps, etc.
