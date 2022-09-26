@@ -4,7 +4,7 @@
 ![output](https://user-images.githubusercontent.com/17668390/192362513-7161bc59-aee8-4129-a8de-e5aef305f344.png)
 
 
-**Stable Diffusion** is a latent text-to-image diffusion model. This is an unofficial implementation in `TensorFlow 2 (Keras)`. The weights were ported from the [original](https://github.com/CompVis/stable-diffusion) implementation. Stable Diffusion model is now available in [KerasCV](https://github.com/keras-team/keras-cv).
+***Stable Diffusion** is a latent text-to-image diffusion model. This is an unofficial implementation in `TensorFlow 2 (Keras)`. The weights were ported from the [original](https://github.com/CompVis/stable-diffusion) implementation. Stable Diffusion model is now available in [KerasCV](https://github.com/keras-team/keras-cv).*
 
 ## Quick Start
 
