@@ -77,7 +77,7 @@ Check out the `text2image.py` file for more options, including image size, numbe
 
 ## Text-to-Image with Stable Diffusion
 
-The following outputs have been generated using this implementation:
+The following outputs have been generated using [KerasCV API](https://github.com/keras-team/keras-cv):
 
 > "Ultra high definiton of an alien cat seahorse fursona, smooth edege, soften" \
   " autistic graphic designer, attractive fluffy".
