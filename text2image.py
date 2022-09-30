@@ -1,5 +1,5 @@
 from tensorflow import keras
-from stable_diffusion_tf.stable_diffusion import Text2Image
+from stable_diffusion_tf.stable_diffusion import StableDiffusion
 import argparse
 from PIL import Image
 
@@ -65,7 +65,7 @@ if args.mp:
     print("Using mixed precision.")
     keras.mixed_precision.set_global_policy("mixed_float16")
 
-generator = Text2Image(img_height=args.H, img_width=args.W, jit_compile=False)
+generator = StableDiffusion(img_height=args.H, img_width=args.W, jit_compile=False)
 img = generator.generate(
     args.prompt,
     num_steps=args.steps,
