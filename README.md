@@ -122,7 +122,20 @@ If you want to use a different name, use the `--output` flag.
 python text2image.py --prompt="An astronaut riding a horse" --output="my_image.png"
 ```
 
-Check out the `text2image.py` file for more options, including image size, number of steps, etc.
+Check out the `text2image.py` file for more options, including image size, number of steps, etc.  
+### Using `img2img.py` from the git repo
+
+Assuming you have installed the required packages, 
+you can modify images from a text prompt using:
+
+```bash
+python img2img.py --prompt="a high quality sketch of people standing with sun and grass , watercolor , pencil color" --input="img.jpeg"
+```
+
+The generated image will be named `img2img-out.jpeg` by default on the root of the repo.
+If you want to use a different name, use the `--output` flag.  
+
+Check out the `img2img.py` file for more options, including the number of steps.
 
 ## Example outputs 
 
