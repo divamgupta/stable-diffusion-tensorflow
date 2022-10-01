@@ -12,6 +12,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
 
 
 - [GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK)
+- [GPU Colab Img2Img](https://colab.research.google.com/drive/1gol0M611zXP6Zpggfri-fG8JDdpMEpsI?usp=sharing)
 - [GPU Colab + Mixed Precision](https://colab.research.google.com/drive/15mQgITh3e9HQMNys0zR8JN4R2vp06d-N)
   - ~10s generation time per image (512x512) on default Colab GPU without drop in quality
     ([source](https://twitter.com/fchollet/status/1571954014845308928))
@@ -46,10 +47,10 @@ There are 2 ways to run the code.
 1. Using the Python interface. If you installed the package, you can use it as follows:
 
 ```python
-from stable_diffusion_tf.stable_diffusion import Text2Image
+from stable_diffusion_tf.stable_diffusion import StableDiffusion
 from PIL import Image
 
-generator = Text2Image(
+generator = StableDiffusion(
     img_height=512,
     img_width=512,
     jit_compile=False,
@@ -61,6 +62,18 @@ img = generator.generate(
     temperature=1,
     batch_size=1,
 )
+
+# for image to image :
+img = generator.generate(
+    "A Halloween bedroom",
+    num_steps=50,
+    unconditional_guidance_scale=7.5,
+    temperature=1,
+    batch_size=1,
+    input_image="/path/to/img.png"
+)
+
+
 Image.fromarray(img[0]).save("output.png")
 ```
 
