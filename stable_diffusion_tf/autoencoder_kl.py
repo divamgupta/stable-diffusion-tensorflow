@@ -98,15 +98,15 @@ class Encoder(keras.Sequential):
                 PaddedConv2D(128, 3, padding=1 ),
                 ResnetBlock(128,128),
                 ResnetBlock(128, 128),
-                DownsampleConv2D(128 , 3 , stride=2),
+                PaddedConv2D(128 , 3 , padding=(0,1), stride=2),
                 
                 ResnetBlock(128,256),
                 ResnetBlock(256, 256),
-                DownsampleConv2D(256 , 3 , stride=2),
+                PaddedConv2D(256 , 3 , padding=(0,1), stride=2),
                 
                 ResnetBlock(256,512),
                 ResnetBlock(512, 512),
-                DownsampleConv2D(512 , 3 , stride=2),
+                PaddedConv2D(512 , 3 , padding=(0,1), stride=2),
                 
                 ResnetBlock(512,512),
                 ResnetBlock(512, 512),
