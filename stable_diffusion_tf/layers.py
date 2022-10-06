@@ -1,20 +1,5 @@
 import tensorflow as tf
 from tensorflow import keras
-
-class DownsampleConv2D(keras.layers.Layer): 
-    #Implemention of Downsample class from ldm/modules/diffusionmodules/model.py
-    #Assume always with_conv, and uses variable channel/kernel/stride instead of hardcoded
-    def __init__(self, channels, kernel_size, stride=1):
-        super().__init__()
-        #Pad right and bottom, as stable diffusion code ((top_pad, bottom_pad), (left_pad, right_pad))
-        self.padding2d = keras.layers.ZeroPadding2D(((0,1), (0,1)))
-        self.conv2d = keras.layers.Conv2D(
-            channels, kernel_size, strides=(stride, stride)
-        )
-
-    def call(self, x):
-        x = self.padding2d(x)
-        return self.conv2d(x)
     
 class PaddedConv2D(keras.layers.Layer):
     def __init__(self, channels, kernel_size, padding=0, stride=1):
