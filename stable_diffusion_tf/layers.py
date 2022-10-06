@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
-    
+
+
 class PaddedConv2D(keras.layers.Layer):
     def __init__(self, channels, kernel_size, padding=0, stride=1):
         super().__init__()
