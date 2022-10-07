@@ -37,6 +37,8 @@ class StableDiffusion:
         if tf.keras.mixed_precision.global_policy().name == 'mixed_float16':
             self.dtype = tf.float16
 
+class StableDiffusionInpaint(StableDiffusion):
+
     def generate(
         self,
         prompt,
@@ -69,17 +71,23 @@ class StableDiffusion:
         if type(input_image) is str:
             input_image = Image.open(input_image)
             input_image = input_image.resize((self.img_width, self.img_height))
-            input_image_orgin = np.array(input_image)[... , :3]
 
-            input_image = (input_image_orgin.astype("float") / 255.0)*2 - 1
+            # Keep a copy of original image for output merging
+            input_image_orgin = np.array(input_image, np.float32)[None, ..., :3]
+
+            input_image = (input_image_orgin / 255.0)*2 - 1
             input_image = tf.cast(input_image, dtype)
 
         if type(input_mask) is str:
-            mask_origin = Image.open(input_mask)
-            
-            latent_mask = mask_origin.resize((self.img_width//8, self.img_height//8))
-            latent_mask = np.array(latent_mask)[None][...,None]
-            latent_mask = 1 - (latent_mask.astype("float") / 255.0)
+            input_mask = Image.open(input_mask)
+
+            # Keep a copy of original mask for output merging
+            mask_origin = input_mask.resize((self.img_width, self.img_height))
+            mask_origin = np.array(mask_origin, np.float32)[None,...,None] / 255.0
+
+            latent_mask = input_mask.resize((self.img_width//8, self.img_height//8))
+            latent_mask = np.array(latent_mask, np.float32)[None,...,None]
+            latent_mask = 1 - (latent_mask / 255.0)
             latent_mask = tf.cast(tf.repeat(latent_mask, batch_size , axis=0), dtype)
 
 
@@ -98,7 +106,7 @@ class StableDiffusion:
         )
 
         if input_image is not None:
-            timesteps = timesteps[: int(len(timesteps)*input_image_strength)]
+            timesteps = timesteps[:int(len(timesteps)*input_image_strength)]
 
         # Diffusion stage
         progbar = tqdm(list(enumerate(timesteps))[::-1])
@@ -118,19 +126,20 @@ class StableDiffusion:
             )
 
             if input_mask is not None:
-              latent_orgin, alphas, alphas_prev = self.get_starting_parameters(
-                  timesteps, batch_size, seed , input_image=input_image, input_img_noise_t=timestep
-              )
-              latent = latent_orgin * latent_mask + latent * (1- latent_mask)
+                # Add noise to input image at current timestep 
+                latent_orgin, alphas, alphas_prev = self.get_starting_parameters(
+                    timesteps, batch_size, seed , input_image=input_image, input_img_noise_t=timestep
+                )
+                # Merge noisy input image with predicted latent image
+                latent = latent_orgin * latent_mask + latent * (1- latent_mask)
 
         # Decoding stage
         decoded = self.decoder.predict_on_batch(latent)
         decoded = ((decoded + 1) / 2) * 255
 
         if input_mask is not None:
-          mask_origin = np.array(mask_origin)[...,None]
-          mask_origin =  (mask_origin.astype("float") / 255.0)
-          decoded = np.array(input_image_orgin) * (1-mask_origin) + np.array(decoded) * (mask_origin)
+            # Merge original image and inpainting output
+            decoded = input_image_orgin * (1-mask_origin) + np.array(decoded) * mask_origin
 
         return np.clip(decoded, 0, 255).astype("uint8")
 
@@ -159,7 +168,7 @@ class StableDiffusion:
         if input_image is None:
             latent = tf.random.normal((batch_size, n_h, n_w, 4), seed=seed)
         else:
-            latent = self.encoder(input_image[None])
+            latent = self.encoder(input_image)
             latent = tf.repeat(latent , batch_size , axis=0)
             latent = self.add_noise(latent, input_img_noise_t)
         return latent, alphas, alphas_prev
