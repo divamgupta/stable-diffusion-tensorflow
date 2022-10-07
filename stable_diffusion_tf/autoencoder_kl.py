@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 import tensorflow_addons as tfa
 
-from .layers import apply_seq, PaddedConv2D, DownsampleConv2D
+from .layers import apply_seq, PaddedConv2D
 
 
 class AttentionBlock(keras.layers.Layer):
