@@ -65,7 +65,7 @@ class StableDiffusion:
         else:
           dtype = tf.float32
         
-
+        input_image_tensor = None
         if type(input_image) is str:
             input_image = Image.open(input_image)
             input_image = input_image.resize((self.img_width, self.img_height))
