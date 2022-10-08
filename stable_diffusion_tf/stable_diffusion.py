@@ -60,10 +60,6 @@ class StableDiffusion:
         pos_ids = np.array(list(range(77)))[None].astype("int32")
         pos_ids = np.repeat(pos_ids, batch_size, axis=0)
         context = self.text_encoder.predict_on_batch([phrase, pos_ids])
-        if tf.keras.mixed_precision.global_policy().name == 'mixed_float16':
-          dtype = tf.half
-        else:
-          dtype = tf.float32
         
         input_image_tensor = None
         if type(input_image) is str:
@@ -71,7 +67,7 @@ class StableDiffusion:
             input_image = input_image.resize((self.img_width, self.img_height))
             input_image_array = np.array(input_image, dtype=np.float32)[None,...,:3]
 
-            input_image_tensor = tf.cast((input_image_array / 255.0) * 2 - 1, dtype)
+            input_image_tensor = tf.cast((input_image_array / 255.0) * 2 - 1, self.dtype)
 
         if type(input_mask) is str:
             input_mask = Image.open(input_mask)
@@ -82,7 +78,7 @@ class StableDiffusion:
             latent_mask = input_mask.resize((self.img_width//8, self.img_height//8))
             latent_mask = np.array(latent_mask, dtype=np.float32)[None,...,None]
             latent_mask = 1 - (latent_mask.astype("float") / 255.0)
-            latent_mask_tensor = tf.cast(tf.repeat(latent_mask, batch_size , axis=0), dtype)
+            latent_mask_tensor = tf.cast(tf.repeat(latent_mask, batch_size , axis=0), self.dtype)
 
 
         # Encode unconditional tokens (and their positions into an
