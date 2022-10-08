@@ -23,9 +23,19 @@ The easiest way to try it out is to use one of the Colab notebooks:
 
 The following outputs have been generated using this implementation:
 
-1. _A dog with sunglasses, wearing comfy hat, looking at camera, highly detailed, ultra sharp, cinematic, 100mm lens, 8k resolution._
+Input Text: _A dog with sunglasses, wearing comfy hat, looking at camera, highly detailed, ultra sharp, cinematic, 100mm lens, 8k resolution._
+
+# Inpainting
 
 ![a](https://user-images.githubusercontent.com/44222184/194685370-e87970f7-dbf5-4d6d-a9d1-31594cdf751a.png)
+
+# Image2Image
+
+![a](https://user-images.githubusercontent.com/44222184/194686889-3d30bd3e-7bfb-4fe4-a6e1-c74bcf5b5944.png)
+
+# Text2Image
+
+![a](https://user-images.githubusercontent.com/44222184/194686712-cb15d191-39b9-4b17-a5c7-2671021ce5e5.png)
 
 ## Installation
 
