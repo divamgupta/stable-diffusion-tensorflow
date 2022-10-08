@@ -19,6 +19,14 @@ The easiest way to try it out is to use one of the Colab notebooks:
     ([source](https://twitter.com/fchollet/status/1572004717362028546)).
 - [GPU Colab with Gradio](https://colab.research.google.com/drive/1ANTUur1MF9DKNd5-BTWhbWa7xUBfCWyI)
 
+## Example outputs
+
+The following outputs have been generated using this implementation:
+
+1. _A dog with sunglasses, wearing comfy hat, looking at camera, highly detailed, ultra sharp, cinematic, 100mm lens, 8k resolution._
+
+![a](https://user-images.githubusercontent.com/44222184/194685370-e87970f7-dbf5-4d6d-a9d1-31594cdf751a.png)
+
 ## Installation
 
 ### Install as a python package
@@ -132,14 +140,6 @@ python text2image.py --prompt="An astronaut riding a horse" --output="my_image.p
 ```
 
 Check out the `text2image.py` file for more options, including image size, number of steps, etc.
-
-## Example outputs
-
-The following outputs have been generated using this implementation:
-
-1. _a man in very nice suit, wearing a tie, standing with a dragon, highly detailed, ultra sharp, 100mm lens, cinematic, 8k resolution._
-
-![a](https://user-images.githubusercontent.com/44222184/194581983-f7ce16a5-d558-4d82-bd84-ada466a16e17.png)
 
 ## References
 
