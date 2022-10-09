@@ -1,6 +1,6 @@
 # Stable Diffusion in TensorFlow / Keras
 
-A Keras / Tensorflow implementation of Stable Diffusion.
+A Keras / Tensorflow implementation of Stable Diffusion. 
 
 The weights were ported from the original implementation.
 
@@ -8,9 +8,9 @@ The weights were ported from the original implementation.
 
 The easiest way to try it out is to use one of the Colab notebooks:
 
+
 - [GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK)
 - [GPU Colab Img2Img](https://colab.research.google.com/drive/1gol0M611zXP6Zpggfri-fG8JDdpMEpsI?usp=sharing)
-- [GPU Colab Inpainting+Text2Image+Image2Image+Mixed Precision](https://colab.research.google.com/drive/1Bf-bNmAdtQhPcYNyC-guu0uTu9MYYfLu)
 - [GPU Colab + Mixed Precision](https://colab.research.google.com/drive/15mQgITh3e9HQMNys0zR8JN4R2vp06d-N)
   - ~10s generation time per image (512x512) on default Colab GPU without drop in quality
     ([source](https://twitter.com/fchollet/status/1571954014845308928))
@@ -19,23 +19,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
     ([source](https://twitter.com/fchollet/status/1572004717362028546)).
 - [GPU Colab with Gradio](https://colab.research.google.com/drive/1ANTUur1MF9DKNd5-BTWhbWa7xUBfCWyI)
 
-## Example outputs
 
-The following outputs have been generated using this implementation:
-
-Input Text: _A dog with sunglasses, wearing comfy hat, looking at camera, highly detailed, ultra sharp, cinematic, 100mm lens, 8k resolution._
-
-# Inpainting
-
-![a](https://user-images.githubusercontent.com/44222184/194685370-e87970f7-dbf5-4d6d-a9d1-31594cdf751a.png)
-
-# Image2Image
-
-![a](https://user-images.githubusercontent.com/44222184/194686889-3d30bd3e-7bfb-4fe4-a6e1-c74bcf5b5944.png)
-
-# Text2Image
-
-![a](https://user-images.githubusercontent.com/44222184/194686712-cb15d191-39b9-4b17-a5c7-2671021ce5e5.png)
 
 ## Installation
 
@@ -65,25 +49,25 @@ Install dependencies using the `requirements.txt` file or the `requirements_m1.t
 pip install -r requirements.txt
 ```
 
-#### Using a virtual environment with _virtualenv_
+#### Using a virtual environment with *virtualenv*
 
-1. Create your virtual environment for `python3`:
+1) Create your virtual environment for `python3`:
 
-   ```bash
-   python3 -m venv venv
-   ```
+    ```bash
+    python3 -m venv venv
+    ```
+   
+2) Activate your virtualenv:
 
-2. Activate your virtualenv:
+    ```bash
+    source venv/bin/activate
+    ```
 
-   ```bash
-   source venv/bin/activate
-   ```
+3) Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
 
-3. Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 ## Usage
 
@@ -118,24 +102,13 @@ img = generator.generate(
     input_image="/path/to/img.png"
 )
 
-# for inpainting :
-# mask should be single channel image with 2 dims [W, H]
-img = generator.generate(
-    "A Halloween bedroom",
-    num_steps=50,
-    unconditional_guidance_scale=7.5,
-    temperature=1,
-    batch_size=1,
-    input_image="/path/to/img.png",
-    input_mask="/path/to/mask.png"
-)
 
 Image.fromarray(img[0]).save("output.png")
 ```
 
 ### Using `text2image.py` from the git repo
 
-Assuming you have installed the required packages,
+Assuming you have installed the required packages, 
 you can generate images from a text prompt using:
 
 ```bash
@@ -151,7 +124,26 @@ python text2image.py --prompt="An astronaut riding a horse" --output="my_image.p
 
 Check out the `text2image.py` file for more options, including image size, number of steps, etc.
 
+## Example outputs 
+
+The following outputs have been generated using this implementation:
+
+1) *A epic and beautiful rococo werewolf drinking coffee, in a burning coffee shop. ultra-detailed. anime, pixiv, uhd 8k cryengine, octane render*
+
+![a](https://user-images.githubusercontent.com/1890549/190841598-3d0b9bd1-d679-4c8d-bd5e-b1e24397b5c8.png)
+
+
+2) *Spider-Gwen Gwen-Stacy Skyscraper Pink White Pink-White Spiderman Photo-realistic 4K*
+
+![a](https://user-images.githubusercontent.com/1890549/190841999-689c9c38-ece4-46a0-ad85-f459ec64c5b8.png)
+
+
+3) *A vision of paradise, Unreal Engine*
+
+![a](https://user-images.githubusercontent.com/1890549/190841886-239406ea-72cb-4570-8f4c-fcd074a7ad7f.png)
+
+
 ## References
 
-1. https://github.com/CompVis/stable-diffusion
-2. https://github.com/geohot/tinygrad/blob/master/examples/stable_diffusion.py
+1) https://github.com/CompVis/stable-diffusion
+2) https://github.com/geohot/tinygrad/blob/master/examples/stable_diffusion.py
