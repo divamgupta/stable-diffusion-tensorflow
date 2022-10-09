@@ -24,7 +24,7 @@ parser.add_argument(
     type=str,
     nargs="?",
     required=True,
-    help="the output image filename",
+    help="the input image filename",
 )
 
 parser.add_argument(
