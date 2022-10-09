@@ -11,6 +11,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
 
 - [GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK)
 - [GPU Colab Img2Img](https://colab.research.google.com/drive/1gol0M611zXP6Zpggfri-fG8JDdpMEpsI?usp=sharing)
+- [GPU Colab Inpainting+Text2Image+Image2Image+Mixed Precision](https://colab.research.google.com/drive/1Bf-bNmAdtQhPcYNyC-guu0uTu9MYYfLu)
 - [GPU Colab + Mixed Precision](https://colab.research.google.com/drive/15mQgITh3e9HQMNys0zR8JN4R2vp06d-N)
   - ~10s generation time per image (512x512) on default Colab GPU without drop in quality
     ([source](https://twitter.com/fchollet/status/1571954014845308928))
@@ -141,6 +142,16 @@ The following outputs have been generated using this implementation:
 3) *A vision of paradise, Unreal Engine*
 
 ![a](https://user-images.githubusercontent.com/1890549/190841886-239406ea-72cb-4570-8f4c-fcd074a7ad7f.png)
+
+### Inpainting
+
+![a](https://user-images.githubusercontent.com/44222184/194685370-e87970f7-dbf5-4d6d-a9d1-31594cdf751a.png)
+
+### Image2Image
+
+1) *a high quality sketch of people standing with sun and grass , watercolor , pencil color*
+<img width="884" alt="Screen Shot 2022-10-09 at 9 34 30 AM" src="https://user-images.githubusercontent.com/1890549/194768637-f586772d-aef5-4d64-8dd5-f7f4962924e1.png">
+
 
 
 ## References
