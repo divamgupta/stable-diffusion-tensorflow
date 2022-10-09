@@ -26,11 +26,16 @@ class StableDiffusion:
         self.diffusion_model = diffusion_model
         self.decoder = decoder
         self.encoder = encoder
+
         if jit_compile:
             self.text_encoder.compile(jit_compile=True)
             self.diffusion_model.compile(jit_compile=True)
             self.decoder.compile(jit_compile=True)
             self.encoder.compile(jit_compile=True)
+
+        self.dtype = tf.float32
+        if tf.keras.mixed_precision.global_policy().name == 'mixed_float16':
+            self.dtype = tf.float16
 
     def generate(
         self,
@@ -41,6 +46,7 @@ class StableDiffusion:
         temperature=1,
         seed=None,
         input_image=None,
+        input_mask=None,
         input_image_strength=0.5,
     ):
         # Tokenize prompt (i.e. starting context)
@@ -54,12 +60,25 @@ class StableDiffusion:
         pos_ids = np.array(list(range(77)))[None].astype("int32")
         pos_ids = np.repeat(pos_ids, batch_size, axis=0)
         context = self.text_encoder.predict_on_batch([phrase, pos_ids])
-
+        
+        input_image_tensor = None
         if type(input_image) is str:
             input_image = Image.open(input_image)
             input_image = input_image.resize((self.img_width, self.img_height))
-            input_image = np.array(input_image)[... , :3]
-            input_image = (input_image.astype("float") / 255.0)*2 - 1
+            input_image_array = np.array(input_image, dtype=np.float32)[None,...,:3]
+
+            input_image_tensor = tf.cast((input_image_array / 255.0) * 2 - 1, self.dtype)
+
+        if type(input_mask) is str:
+            input_mask = Image.open(input_mask)
+            input_mask = input_mask.resize((self.img_width, self.img_height))
+            input_mask_array = np.array(input_mask, dtype=np.float32)[None,...,None]
+            input_mask_array =  input_mask_array / 255.0
+            
+            latent_mask = input_mask.resize((self.img_width//8, self.img_height//8))
+            latent_mask = np.array(latent_mask, dtype=np.float32)[None,...,None]
+            latent_mask = 1 - (latent_mask.astype("float") / 255.0)
+            latent_mask_tensor = tf.cast(tf.repeat(latent_mask, batch_size , axis=0), self.dtype)
 
 
         # Encode unconditional tokens (and their positions into an
@@ -73,7 +92,7 @@ class StableDiffusion:
         timesteps = np.arange(1, 1000, 1000 // num_steps)
         input_img_noise_t = timesteps[ int(len(timesteps)*input_image_strength) ]
         latent, alphas, alphas_prev = self.get_starting_parameters(
-            timesteps, batch_size, seed , input_image=input_image, input_img_noise_t=input_img_noise_t
+            timesteps, batch_size, seed , input_image=input_image_tensor, input_img_noise_t=input_img_noise_t
         )
 
         if input_image is not None:
@@ -96,18 +115,23 @@ class StableDiffusion:
                 latent, e_t, index, a_t, a_prev, temperature, seed
             )
 
+            if input_mask is not None and input_image is not None:
+                # If mask is provided, noise at current timestep will be added to input image.
+                # The intermediate latent will be merged with input latent.
+                latent_orgin, alphas, alphas_prev = self.get_starting_parameters(
+                    timesteps, batch_size, seed , input_image=input_image_tensor, input_img_noise_t=timestep
+                )
+                latent = latent_orgin * latent_mask_tensor + latent * (1- latent_mask_tensor)
+
         # Decoding stage
         decoded = self.decoder.predict_on_batch(latent)
         decoded = ((decoded + 1) / 2) * 255
+
+        if input_mask is not None:
+          # Merge inpainting output with original image
+          decoded = input_image_array * (1-input_mask_array) + np.array(decoded) * input_mask_array
+
         return np.clip(decoded, 0, 255).astype("uint8")
-
-    def add_noise(self, x , t ):
-        batch_size,w,h = x.shape[0] , x.shape[1] , x.shape[2]
-        noise = tf.random.normal((batch_size,w,h,4))
-        sqrt_alpha_prod = _ALPHAS_CUMPROD[t] ** 0.5
-        sqrt_one_minus_alpha_prod = (1 - _ALPHAS_CUMPROD[t]) ** 0.5
-
-        return  sqrt_alpha_prod * x + sqrt_one_minus_alpha_prod * noise
 
     def timestep_embedding(self, timesteps, dim=320, max_period=10000):
         half = dim // 2
@@ -116,7 +140,28 @@ class StableDiffusion:
         )
         args = np.array(timesteps) * freqs
         embedding = np.concatenate([np.cos(args), np.sin(args)])
-        return tf.convert_to_tensor(embedding.reshape(1, -1))
+        return tf.convert_to_tensor(embedding.reshape(1, -1),dtype=self.dtype)
+
+    def add_noise(self, x , t ):
+        batch_size,w,h = x.shape[0] , x.shape[1] , x.shape[2]
+        noise = tf.random.normal((batch_size,w,h,4), dtype=self.dtype)
+        sqrt_alpha_prod = _ALPHAS_CUMPROD[t] ** 0.5
+        sqrt_one_minus_alpha_prod = (1 - _ALPHAS_CUMPROD[t]) ** 0.5
+
+        return  sqrt_alpha_prod * x + sqrt_one_minus_alpha_prod * noise
+
+    def get_starting_parameters(self, timesteps, batch_size, seed,  input_image=None, input_img_noise_t=None):
+        n_h = self.img_height // 8
+        n_w = self.img_width // 8
+        alphas = [_ALPHAS_CUMPROD[t] for t in timesteps]
+        alphas_prev = [1.0] + alphas[:-1]
+        if input_image is None:
+            latent = tf.random.normal((batch_size, n_h, n_w, 4), seed=seed)
+        else:
+            latent = self.encoder(input_image)
+            latent = tf.repeat(latent , batch_size , axis=0)
+            latent = self.add_noise(latent, input_img_noise_t)
+        return latent, alphas, alphas_prev
 
     def get_model_output(
         self,
@@ -148,20 +193,6 @@ class StableDiffusion:
         noise = sigma_t * tf.random.normal(x.shape, seed=seed) * temperature
         x_prev = math.sqrt(a_prev) * pred_x0 + dir_xt
         return x_prev, pred_x0
-
-    def get_starting_parameters(self, timesteps, batch_size, seed,  input_image=None, input_img_noise_t=None):
-        n_h = self.img_height // 8
-        n_w = self.img_width // 8
-        alphas = [_ALPHAS_CUMPROD[t] for t in timesteps]
-        alphas_prev = [1.0] + alphas[:-1]
-        if input_image is None:
-            latent = tf.random.normal((batch_size, n_h, n_w, 4), seed=seed)
-        else:
-            latent = self.encoder(input_image[None])
-            latent = self.add_noise(latent, input_img_noise_t)
-            latent = tf.repeat(latent , batch_size , axis=0)
-        return latent, alphas, alphas_prev
-
 
 def get_models(img_height, img_width, download_weights=True):
     n_h = img_height // 8
