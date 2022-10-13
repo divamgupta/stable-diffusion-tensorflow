@@ -1,38 +1,87 @@
 # Stable Diffusion in TensorFlow / Keras
 
-A Keras / Tensorflow implementation of Stable Diffusion.
+A Keras / Tensorflow implementation of Stable Diffusion. 
 
-This is a fork of [stable-diffusion-tensorflow](https://github.com/divamgupta/stable-diffusion-tensorflow)
-created by @divamgupta. The weights were ported from the original implementation.
+The weights were ported from the original implementation.
 
+## Colab Notebooks
+
+The easiest way to try it out is to use one of the Colab notebooks:
+
+
+- [GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK)
+- [GPU Colab Img2Img](https://colab.research.google.com/drive/1gol0M611zXP6Zpggfri-fG8JDdpMEpsI?usp=sharing)
+- [GPU Colab Inpainting+Text2Image+Image2Image+Mixed Precision](https://colab.research.google.com/drive/1Bf-bNmAdtQhPcYNyC-guu0uTu9MYYfLu)
+- [GPU Colab - Tile / Texture generation](https://colab.research.google.com/drive/1xCxsNvQMEywzlqbjH4tGfEyXamSAeFbn?usp=sharing)
+- [GPU Colab + Mixed Precision](https://colab.research.google.com/drive/15mQgITh3e9HQMNys0zR8JN4R2vp06d-N)
+  - ~10s generation time per image (512x512) on default Colab GPU without drop in quality
+    ([source](https://twitter.com/fchollet/status/1571954014845308928))
+- [TPU Colab](https://colab.research.google.com/drive/17zQOm_2Iu6pcP8otT-v6rx0D-pKgfaLm).
+  - Slower than GPU for single-image generation, faster for large batch of 8+ images
+    ([source](https://twitter.com/fchollet/status/1572004717362028546)).
+- [GPU Colab with Gradio](https://colab.research.google.com/drive/1ANTUur1MF9DKNd5-BTWhbWa7xUBfCWyI)
+
+
+
+## Installation
+
+### Install as a python package
+
+Install using pip with the git repo:
+
+```bash
+pip install git+https://github.com/divamgupta/stable-diffusion-tensorflow
+```
+
+### Installing using the repo
+
+Download the repo, either by downloading the
+[zip](https://github.com/divamgupta/stable-diffusion-tensorflow/archive/refs/heads/master.zip)
+file or by cloning the repo with git:
+
+```bash
+git clone git@github.com:divamgupta/stable-diffusion-tensorflow.git
+```
+
+#### Using pip without a virtual environment
+
+Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
+
+```bash
+pip install -r requirements.txt
+```
+
+#### Using a virtual environment with *virtualenv*
+
+1) Create your virtual environment for `python3`:
+
+    ```bash
+    python3 -m venv venv
+    ```
+   
+2) Activate your virtualenv:
+
+    ```bash
+    source venv/bin/activate
+    ```
+
+3) Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 ## Usage
 
-1) Try it out with [this GPU Colab](https://colab.research.google.com/drive/1zVTa4mLeM_w44WaFwl7utTaa6JcaH1zK).
+### Using the Python interface
 
-2) Using the command line :
-
-```
-python text2image.py --prompt="An astronaut riding a horse"
-```
-
-3) Using the WebUI :
-
-```
-python webui.py
-```
-
-4) Using the python interface:
-
-```
-pip install git+https://github.com/fchollet/stable-diffusion-tensorflow
-```
+If you installed the package, you can use it as follows:
 
 ```python
-from stable_diffusion_tf.stable_diffusion import Text2Image
+from stable_diffusion_tf.stable_diffusion import StableDiffusion
 from PIL import Image
 
-generator = Text2Image(
+generator = StableDiffusion(
     img_height=512,
     img_width=512,
     jit_compile=False,
@@ -42,14 +91,63 @@ img = generator.generate(
     num_steps=50,
     unconditional_guidance_scale=7.5,
     temperature=1,
-	batch_size=1,
+    batch_size=1,
 )
+
+# for image to image :
+img = generator.generate(
+    "A Halloween bedroom",
+    num_steps=50,
+    unconditional_guidance_scale=7.5,
+    temperature=1,
+    batch_size=1,
+    input_image="/path/to/img.png"
+)
+
+
 Image.fromarray(img[0]).save("output.png")
 ```
 
-## Example outputs
+### Using `text2image.py` from the git repo
 
-The following outputs have been generated using the this implementation:
+Assuming you have installed the required packages, 
+you can generate images from a text prompt using:
+
+```bash
+python text2image.py --prompt="An astronaut riding a horse"
+```
+
+The generated image will be named `output.png` on the root of the repo.
+If you want to use a different name, use the `--output` flag.
+
+```bash
+python text2image.py --prompt="An astronaut riding a horse" --output="my_image.png"
+```
+
+Check out the `text2image.py` file for more options, including image size, number of steps, etc.  
+### Using `img2img.py` from the git repo
+
+Assuming you have installed the required packages, 
+you can modify images from a text prompt using:
+
+```bash
+python img2img.py --prompt="a high quality sketch of people standing with sun and grass , watercolor , pencil color" --input="img.jpeg"
+```
+
+The generated image will be named `img2img-out.jpeg` by default on the root of the repo.
+If you want to use a different name, use the `--output` flag.  
+
+Check out the `img2img.py` file for more options, including the number of steps.
+
+### Using the WebUI :
+
+```bash
+python webui.py
+```
+
+## Example outputs 
+
+The following outputs have been generated using this implementation:
 
 1) *A epic and beautiful rococo werewolf drinking coffee, in a burning coffee shop. ultra-detailed. anime, pixiv, uhd 8k cryengine, octane render*
 
@@ -64,6 +162,16 @@ The following outputs have been generated using the this implementation:
 3) *A vision of paradise, Unreal Engine*
 
 ![a](https://user-images.githubusercontent.com/1890549/190841886-239406ea-72cb-4570-8f4c-fcd074a7ad7f.png)
+
+### Inpainting
+
+![a](https://user-images.githubusercontent.com/44222184/194685370-e87970f7-dbf5-4d6d-a9d1-31594cdf751a.png)
+
+### Image2Image
+
+1) *a high quality sketch of people standing with sun and grass , watercolor , pencil color*
+<img width="884" alt="Screen Shot 2022-10-09 at 9 34 30 AM" src="https://user-images.githubusercontent.com/1890549/194768637-f586772d-aef5-4d64-8dd5-f7f4962924e1.png">
+
 
 
 ## References

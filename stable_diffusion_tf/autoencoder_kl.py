@@ -89,3 +89,37 @@ class Decoder(keras.Sequential):
                 PaddedConv2D(3, 3, padding=1),
             ]
         )
+
+
+class Encoder(keras.Sequential):
+    def __init__(self):
+        super().__init__(
+            [
+                PaddedConv2D(128, 3, padding=1 ),
+                ResnetBlock(128,128),
+                ResnetBlock(128, 128),
+                PaddedConv2D(128 , 3 , padding=(0,1), stride=2),
+                
+                ResnetBlock(128,256),
+                ResnetBlock(256, 256),
+                PaddedConv2D(256 , 3 , padding=(0,1), stride=2),
+                
+                ResnetBlock(256,512),
+                ResnetBlock(512, 512),
+                PaddedConv2D(512 , 3 , padding=(0,1), stride=2),
+                
+                ResnetBlock(512,512),
+                ResnetBlock(512, 512),
+                
+                ResnetBlock(512, 512),
+                AttentionBlock(512),
+                ResnetBlock(512, 512),
+                
+                tfa.layers.GroupNormalization(epsilon=1e-5) , 
+                keras.layers.Activation("swish"),
+                PaddedConv2D(8, 3, padding=1 ),
+                PaddedConv2D(8, 1 ),
+                keras.layers.Lambda(lambda x : x[... , :4] * 0.18215)
+            ]
+        )
+
