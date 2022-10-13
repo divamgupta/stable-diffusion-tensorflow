@@ -1,8 +1,8 @@
 import gradio as gr
-from stable_diffusion_tf.stable_diffusion import Text2Image
+from stable_diffusion_tf.stable_diffusion import StableDiffusion
 
 
-generator = Text2Image(img_height=512, img_width=512, jit_compile=False)
+generator = StableDiffusion(img_height=512, img_width=512, jit_compile=False)
 
 
 def infer(prompt, samples, steps, scale, seed):
