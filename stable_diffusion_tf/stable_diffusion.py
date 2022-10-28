@@ -9,7 +9,7 @@ from .autoencoder_kl import Decoder, Encoder
 from .diffusion_model import UNetModel
 from .clip_encoder import CLIPTextTransformer
 from .clip_tokenizer import SimpleTokenizer
-from .constants import _UNCONDITIONAL_TOKENS, _ALPHAS_CUMPROD
+from .constants import _UNCONDITIONAL_TOKENS, _ALPHAS_CUMPROD, PYTORCH_CKPT_MAPPING
 from PIL import Image
 
 MAX_TEXT_LEN = 77
@@ -193,6 +193,19 @@ class StableDiffusion:
         noise = sigma_t * tf.random.normal(x.shape, seed=seed) * temperature
         x_prev = math.sqrt(a_prev) * pred_x0 + dir_xt
         return x_prev, pred_x0
+
+    def load_weights_from_pytorch_ckpt(self , pytorch_ckpt_path):
+        import torch
+        pt_weights = torch.load(pytorch_ckpt_path)
+        for module_name in ['text_encoder', 'diffusion_model', 'decoder', 'encoder' ]:
+            module_weights = []
+            for i , (key , perm ) in enumerate(PYTORCH_CKPT_MAPPING[module_name]):
+                w = pt_weights['state_dict'][key].numpy()
+                if perm is not None:
+                    w = np.transpose(w , perm )
+                module_weights.append(w)
+            getattr(self, module_name).set_weights(module_weights)
+            print("Loaded %d weights for %s"%(len(module_weights) , module_name))
 
 def get_models(img_height, img_width, download_weights=True):
     n_h = img_height // 8
