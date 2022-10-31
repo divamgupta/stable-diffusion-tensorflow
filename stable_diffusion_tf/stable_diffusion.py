@@ -62,11 +62,15 @@ class StableDiffusion:
         context = self.text_encoder.predict_on_batch([phrase, pos_ids])
         
         input_image_tensor = None
-        if type(input_image) is str:
-            input_image = Image.open(input_image)
-            input_image = input_image.resize((self.img_width, self.img_height))
-            input_image_array = np.array(input_image, dtype=np.float32)[None,...,:3]
+        if input_image is not None:
+            if type(input_image) is str:
+                input_image = Image.open(input_image)
+                input_image = input_image.resize((self.img_width, self.img_height))
 
+            elif type(input_image) is np.ndarray:
+                input_image = np.resize(input_image, (self.img_height, self.img_width, input_image.shape[2]))
+                
+            input_image_array = np.array(input_image, dtype=np.float32)[None,...,:3]
             input_image_tensor = tf.cast((input_image_array / 255.0) * 2 - 1, self.dtype)
 
         if type(input_mask) is str:
@@ -196,7 +200,7 @@ class StableDiffusion:
 
     def load_weights_from_pytorch_ckpt(self , pytorch_ckpt_path):
         import torch
-        pt_weights = torch.load(pytorch_ckpt_path)
+        pt_weights = torch.load(pytorch_ckpt_path, map_location="cpu")
         for module_name in ['text_encoder', 'diffusion_model', 'decoder', 'encoder' ]:
             module_weights = []
             for i , (key , perm ) in enumerate(PYTORCH_CKPT_MAPPING[module_name]):
