@@ -13,6 +13,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
 - [GPU Colab Img2Img](https://colab.research.google.com/drive/1gol0M611zXP6Zpggfri-fG8JDdpMEpsI?usp=sharing)
 - [GPU Colab Inpainting](https://colab.research.google.com/drive/1Bf-bNmAdtQhPcYNyC-guu0uTu9MYYfLu)
 - [GPU Colab - Tile / Texture generation](https://colab.research.google.com/drive/1xCxsNvQMEywzlqbjH4tGfEyXamSAeFbn?usp=sharing)
+- [GPU Colab - Loading Pytorch ckpt Weights](https://colab.research.google.com/drive/1wUdqxji-jxkThYf0OVW3F-0VVpTFdjMa?usp=sharing)
 - [GPU Colab + Mixed Precision](https://colab.research.google.com/drive/15mQgITh3e9HQMNys0zR8JN4R2vp06d-N)
   - ~10s generation time per image (512x512) on default Colab GPU without drop in quality
     ([source](https://twitter.com/fchollet/status/1571954014845308928))
