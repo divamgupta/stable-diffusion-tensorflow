@@ -146,9 +146,10 @@ class StableDiffusion:
         embedding = np.concatenate([np.cos(args), np.sin(args)])
         return tf.convert_to_tensor(embedding.reshape(1, -1),dtype=self.dtype)
 
-    def add_noise(self, x , t ):
+    def add_noise(self, x , t , noise=None ):
         batch_size,w,h = x.shape[0] , x.shape[1] , x.shape[2]
-        noise = tf.random.normal((batch_size,w,h,4), dtype=self.dtype)
+        if noise is None:
+            noise = tf.random.normal((batch_size,w,h,4), dtype=self.dtype)
         sqrt_alpha_prod = _ALPHAS_CUMPROD[t] ** 0.5
         sqrt_one_minus_alpha_prod = (1 - _ALPHAS_CUMPROD[t]) ** 0.5
 
