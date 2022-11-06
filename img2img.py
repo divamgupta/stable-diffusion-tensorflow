@@ -13,6 +13,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--negative-prompt",
+    type=str,
+    help="the negative prompt to use (if any)",
+)
+
+parser.add_argument(
     "--steps", 
     type=int, 
     default=50, 
@@ -45,6 +51,7 @@ generator = StableDiffusion(
 
 img = generator.generate(
     args.prompt,
+    negative_prompt=args.negative_prompt,
     num_steps=args.steps,
     unconditional_guidance_scale=7.5,
     temperature=1,
