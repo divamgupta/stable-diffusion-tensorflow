@@ -40,6 +40,7 @@ class StableDiffusion:
     def generate(
         self,
         prompt,
+        negative_prompt=None,
         batch_size=1,
         num_steps=25,
         unconditional_guidance_scale=7.5,
@@ -85,13 +86,19 @@ class StableDiffusion:
             latent_mask_tensor = tf.cast(tf.repeat(latent_mask, batch_size , axis=0), self.dtype)
 
 
+        # Tokenize negative prompt or use default padding tokens
+        unconditional_tokens = _UNCONDITIONAL_TOKENS
+        if negative_prompt is not None:
+            inputs = self.tokenizer.encode(negative_prompt)
+            assert len(inputs) < 77, "Negative prompt is too long (should be < 77 tokens)"
+            unconditional_tokens = inputs + [49407] * (77 - len(inputs))
+
         # Encode unconditional tokens (and their positions into an
         # "unconditional context vector"
-        unconditional_tokens = np.array(_UNCONDITIONAL_TOKENS)[None].astype("int32")
+        unconditional_tokens = np.array(unconditional_tokens)[None].astype("int32")
         unconditional_tokens = np.repeat(unconditional_tokens, batch_size, axis=0)
-        self.unconditional_tokens = tf.convert_to_tensor(unconditional_tokens)
         unconditional_context = self.text_encoder.predict_on_batch(
-            [self.unconditional_tokens, pos_ids]
+            [unconditional_tokens, pos_ids]
         )
         timesteps = np.arange(1, 1000, 1000 // num_steps)
         input_img_noise_t = timesteps[ int(len(timesteps)*input_image_strength) ]
