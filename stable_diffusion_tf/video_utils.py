@@ -96,7 +96,7 @@ def generate_frames_translation(ax_trans, max_num_frames):
     str_for_parse_key_frames = f"0:({ax_trans})"
     key_frames = parse_key_frames(str_for_parse_key_frames)
     frames_translation_values = get_inbetweens(key_frames, max_num_frames)
-    return frames_translation_values
+    return frames_translation_values.to_dict()
 
 
 def create_prompts_frames_dict(first_prompt, first_frame=0, second_prompt=None, second_frame=None, third_prompt=None, third_frame=None, fourth_prompt=None, fourth_frame=None):
