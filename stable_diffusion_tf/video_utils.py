@@ -96,7 +96,7 @@ def generate_frames_translation(ax_trans, max_num_frames):
     str_for_parse_key_frames = f"0:({ax_trans})"
     key_frames = parse_key_frames(str_for_parse_key_frames)
     frames_translation_values = get_inbetweens(key_frames, max_num_frames)
-    return frames_translation_values.to_dict()
+    return frames_translation_values
 
 
 def create_prompts_frames_dict(first_prompt, first_frame=0, second_prompt=None, second_frame=None, third_prompt=None, third_frame=None, fourth_prompt=None, fourth_frame=None):
@@ -208,6 +208,20 @@ def create_prompt_iprompt_seq(args, prompts_frames_dict):
                 prompt_iprompt_seq_lst.append(prompt_idx_dict)
 
     return prompt_iprompt_seq_lst
+
+
+def generate_init_frame(curr_prompt, args, generator):
+    img = generator.generate(
+        curr_prompt,
+        seed=args['seed'],
+        num_steps=40,
+        unconditional_guidance_scale=7,
+        temperature=1,
+        batch_size=1,
+    )
+
+    next_seed(args)
+    return img[0]
 
 
 def construct_ffmpeg_video_cmd(args, frames_path, mp4_path):
