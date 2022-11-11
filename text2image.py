@@ -14,6 +14,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--negative-prompt",
+    type=str,
+    help="the negative prompt to use (if any)",
+)
+
+parser.add_argument(
     "--output",
     type=str,
     nargs="?",
@@ -68,6 +74,7 @@ if args.mp:
 generator = StableDiffusion(img_height=args.H, img_width=args.W, jit_compile=False)
 img = generator.generate(
     args.prompt,
+    negative_prompt=args.negative_prompt,
     num_steps=args.steps,
     unconditional_guidance_scale=args.scale,
     temperature=1,
