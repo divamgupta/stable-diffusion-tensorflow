@@ -170,9 +170,10 @@ The following outputs have been generated using this implementation:
 
 ### Keras Stable Diffusion Video Generation
 
-1) *beautiful amsterdam street view, vincent van gogh, artstation concept art, vivid colors*
+1) *A beautiful street view of prague, artstation concept art, extremely detailed oil painting, vivid colors*
 
-https://user-images.githubusercontent.com/63783894/199249816-5a50fa45-cecd-4f6e-a373-01c8e954398a.mp4
+https://user-images.githubusercontent.com/63783894/201447745-6a3a96f4-f065-4e54-be5d-01941475a31c.mp4
+
 
 ## References
 
