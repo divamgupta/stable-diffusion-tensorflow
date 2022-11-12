@@ -105,7 +105,7 @@ def create_prompts_frames_dict(first_prompt, first_frame=0, second_prompt=None, 
     if not first_prompt:
         raise RuntimeError('Please make sure you passed a valid prompt')
     
-    if first_frame != 0:
+    if int(first_frame) != 0:
         raise RuntimeError('The number of the first frame must to be 0')
 
     prompts_frames_dict['prompt1'] = [first_prompt, first_frame]
