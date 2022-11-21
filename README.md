@@ -21,6 +21,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
   - Slower than GPU for single-image generation, faster for large batch of 8+ images
     ([source](https://twitter.com/fchollet/status/1572004717362028546)).
 - [GPU Colab with Gradio](https://colab.research.google.com/drive/1ANTUur1MF9DKNd5-BTWhbWa7xUBfCWyI)
+- [GPU Colab - Video Generation](https://colab.research.google.com/drive/1EHEX1XiVlpvunLJOGVSPWfoSNWyh4McH?usp=sharing)
 
 
 
@@ -167,6 +168,11 @@ The following outputs have been generated using this implementation:
 1) *a high quality sketch of people standing with sun and grass , watercolor , pencil color*
 <img width="884" alt="Screen Shot 2022-10-09 at 9 34 30 AM" src="https://user-images.githubusercontent.com/1890549/194768637-f586772d-aef5-4d64-8dd5-f7f4962924e1.png">
 
+### Keras Stable Diffusion Video Generation
+
+1) *A beautiful street view of prague, artstation concept art, extremely detailed oil painting, vivid colors*
+
+https://user-images.githubusercontent.com/63783894/201447745-6a3a96f4-f065-4e54-be5d-01941475a31c.mp4
 
 
 ## References
