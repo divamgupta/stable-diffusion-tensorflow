@@ -21,7 +21,7 @@ The easiest way to try it out is to use one of the Colab notebooks:
   - Slower than GPU for single-image generation, faster for large batch of 8+ images
     ([source](https://twitter.com/fchollet/status/1572004717362028546)).
 - [GPU Colab with Gradio](https://colab.research.google.com/drive/1ANTUur1MF9DKNd5-BTWhbWa7xUBfCWyI)
-- [GPU Colab - Video Generation](https://colab.research.google.com/drive/1EHEX1XiVlpvunLJOGVSPWfoSNWyh4McH?usp=sharing)
+- [GPU Colab - Video Generation](https://colab.research.google.com/drive/1aUkXK4zE61iswyYBpUosz730bniNKqk_)
 
 
 
