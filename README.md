@@ -141,6 +141,12 @@ If you want to use a different name, use the `--output` flag.
 
 Check out the `img2img.py` file for more options, including the number of steps.
 
+### Using the WebUI :
+
+```bash
+python webui.py
+```
+
 ## Example outputs 
 
 The following outputs have been generated using this implementation:
