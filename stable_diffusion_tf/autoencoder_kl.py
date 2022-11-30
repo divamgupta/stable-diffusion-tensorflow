@@ -19,7 +19,10 @@ class AttentionBlock(keras.layers.Layer):
         q, k, v = self.q(h_), self.k(h_), self.v(h_)
 
         # Compute attention
-        b, h, w, c = q.shape
+        # b, h, w, c = q.shape
+        h = tf.shape(q)[1]
+        w = tf.shape(q)[2]
+        c = q.shape[3]
         q = tf.reshape(q, (-1, h * w, c))  # b,hw,c
         k = keras.layers.Permute((3, 1, 2))(k)
         k = tf.reshape(k, (-1, c, h * w))  # b,c,hw

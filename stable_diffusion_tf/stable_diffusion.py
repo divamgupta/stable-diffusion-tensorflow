@@ -21,7 +21,7 @@ class StableDiffusion:
         self.img_width = img_width
         self.tokenizer = SimpleTokenizer()
 
-        text_encoder, diffusion_model, decoder, encoder = get_models(img_height, img_width, download_weights=download_weights)
+        text_encoder, diffusion_model, decoder, encoder = get_models( download_weights=download_weights)
         self.text_encoder = text_encoder
         self.diffusion_model = diffusion_model
         self.decoder = decoder
@@ -40,6 +40,7 @@ class StableDiffusion:
     def generate(
         self,
         prompt,
+        img_height=None, img_width=None,
         negative_prompt=None,
         batch_size=1,
         num_steps=25,
@@ -50,6 +51,10 @@ class StableDiffusion:
         input_mask=None,
         input_image_strength=0.5,
     ):
+        if img_height is None or img_height < -1:
+            img_height = self.img_height
+        if img_width is None or img_width < -1:
+            img_width = self.img_width
         # Tokenize prompt (i.e. starting context)
         inputs = self.tokenizer.encode(prompt)
         assert len(inputs) < 77, "Prompt is too long (should be < 77 tokens)"
@@ -66,21 +71,21 @@ class StableDiffusion:
         if input_image is not None:
             if type(input_image) is str:
                 input_image = Image.open(input_image)
-                input_image = input_image.resize((self.img_width, self.img_height))
+                input_image = input_image.resize((img_width, img_height))
 
             elif type(input_image) is np.ndarray:
-                input_image = np.resize(input_image, (self.img_height, self.img_width, input_image.shape[2]))
+                input_image = np.resize(input_image, (img_height, img_width, input_image.shape[2]))
                 
             input_image_array = np.array(input_image, dtype=np.float32)[None,...,:3]
             input_image_tensor = tf.cast((input_image_array / 255.0) * 2 - 1, self.dtype)
 
         if type(input_mask) is str:
             input_mask = Image.open(input_mask)
-            input_mask = input_mask.resize((self.img_width, self.img_height))
+            input_mask = input_mask.resize((img_width, img_height))
             input_mask_array = np.array(input_mask, dtype=np.float32)[None,...,None]
             input_mask_array =  input_mask_array / 255.0
             
-            latent_mask = input_mask.resize((self.img_width//8, self.img_height//8))
+            latent_mask = input_mask.resize((img_width//8, img_height//8))
             latent_mask = np.array(latent_mask, dtype=np.float32)[None,...,None]
             latent_mask = 1 - (latent_mask.astype("float") / 255.0)
             latent_mask_tensor = tf.cast(tf.repeat(latent_mask, batch_size , axis=0), self.dtype)
@@ -103,7 +108,7 @@ class StableDiffusion:
         timesteps = np.arange(1, 1000, 1000 // num_steps)
         input_img_noise_t = timesteps[ int(len(timesteps)*input_image_strength) ]
         latent, alphas, alphas_prev = self.get_starting_parameters(
-            timesteps, batch_size, seed , input_image=input_image_tensor, input_img_noise_t=input_img_noise_t
+            img_height, img_width, timesteps, batch_size, seed , input_image=input_image_tensor, input_img_noise_t=input_img_noise_t
         )
 
         if input_image is not None:
@@ -130,7 +135,7 @@ class StableDiffusion:
                 # If mask is provided, noise at current timestep will be added to input image.
                 # The intermediate latent will be merged with input latent.
                 latent_orgin, alphas, alphas_prev = self.get_starting_parameters(
-                    timesteps, batch_size, seed , input_image=input_image_tensor, input_img_noise_t=timestep
+                    img_height, img_width, timesteps, batch_size, seed , input_image=input_image_tensor, input_img_noise_t=timestep
                 )
                 latent = latent_orgin * latent_mask_tensor + latent * (1- latent_mask_tensor)
 
@@ -162,9 +167,9 @@ class StableDiffusion:
 
         return  sqrt_alpha_prod * x + sqrt_one_minus_alpha_prod * noise
 
-    def get_starting_parameters(self, timesteps, batch_size, seed,  input_image=None, input_img_noise_t=None):
-        n_h = self.img_height // 8
-        n_w = self.img_width // 8
+    def get_starting_parameters(self, img_height, img_width, timesteps, batch_size, seed,  input_image=None, input_img_noise_t=None):
+        n_h = img_height // 8
+        n_w = img_width // 8
         alphas = [_ALPHAS_CUMPROD[t] for t in timesteps]
         alphas_prev = [1.0] + alphas[:-1]
         if input_image is None:
@@ -219,10 +224,7 @@ class StableDiffusion:
             getattr(self, module_name).set_weights(module_weights)
             print("Loaded %d weights for %s"%(len(module_weights) , module_name))
 
-def get_models(img_height, img_width, download_weights=True):
-    n_h = img_height // 8
-    n_w = img_width // 8
-
+def get_models(download_weights=True):
     # Create text encoder
     input_word_ids = keras.layers.Input(shape=(MAX_TEXT_LEN,), dtype="int32")
     input_pos_ids = keras.layers.Input(shape=(MAX_TEXT_LEN,), dtype="int32")
@@ -232,18 +234,18 @@ def get_models(img_height, img_width, download_weights=True):
     # Creation diffusion UNet
     context = keras.layers.Input((MAX_TEXT_LEN, 768))
     t_emb = keras.layers.Input((320,))
-    latent = keras.layers.Input((n_h, n_w, 4))
+    latent = keras.layers.Input((None, None, 4))
     unet = UNetModel()
     diffusion_model = keras.models.Model(
         [latent, t_emb, context], unet([latent, t_emb, context])
     )
 
     # Create decoder
-    latent = keras.layers.Input((n_h, n_w, 4))
+    latent = keras.layers.Input((None, None, 4))
     decoder = Decoder()
     decoder = keras.models.Model(latent, decoder(latent))
 
-    inp_img = keras.layers.Input((img_height, img_width, 3))
+    inp_img = keras.layers.Input((None, None, 3))
     encoder = Encoder()
     encoder = keras.models.Model(inp_img, encoder(inp_img))
 

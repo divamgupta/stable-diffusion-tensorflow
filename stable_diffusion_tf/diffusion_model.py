@@ -1,15 +1,14 @@
 import tensorflow as tf
 from tensorflow import keras
-import tensorflow_addons as tfa
 
-from .layers import PaddedConv2D, apply_seq, td_dot, GEGLU
+from .layers import PaddedConv2D, apply_seq, td_dot, GEGLU, GroupNormalization
 
 
 class ResBlock(keras.layers.Layer):
     def __init__(self, channels, out_channels):
         super().__init__()
         self.in_layers = [
-            tfa.layers.GroupNormalization(epsilon=1e-5),
+            GroupNormalization(epsilon=1e-5),
             keras.activations.swish,
             PaddedConv2D(out_channels, 3, padding=1),
         ]
@@ -18,7 +17,7 @@ class ResBlock(keras.layers.Layer):
             keras.layers.Dense(out_channels),
         ]
         self.out_layers = [
-            tfa.layers.GroupNormalization(epsilon=1e-5),
+            GroupNormalization(epsilon=1e-5),
             keras.activations.swish,
             PaddedConv2D(out_channels, 3, padding=1),
         ]
@@ -54,10 +53,10 @@ class CrossAttention(keras.layers.Layer):
         x, context = inputs
         context = x if context is None else context
         q, k, v = self.to_q(x), self.to_k(context), self.to_v(context)
-        assert len(x.shape) == 3
-        q = tf.reshape(q, (-1, x.shape[1], self.num_heads, self.head_size))
-        k = tf.reshape(k, (-1, context.shape[1], self.num_heads, self.head_size))
-        v = tf.reshape(v, (-1, context.shape[1], self.num_heads, self.head_size))
+
+        q = tf.reshape(q, (-1, tf.shape(x)[1], self.num_heads, self.head_size))
+        k = tf.reshape(k, (-1, tf.shape(context)[1], self.num_heads, self.head_size))
+        v = tf.reshape(v, (-1, tf.shape(context)[1], self.num_heads, self.head_size))
 
         q = keras.layers.Permute((2, 1, 3))(q)  # (bs, num_heads, time, head_size)
         k = keras.layers.Permute((2, 3, 1))(k)  # (bs, num_heads, head_size, time)
@@ -69,7 +68,7 @@ class CrossAttention(keras.layers.Layer):
         attention = keras.layers.Permute((2, 1, 3))(
             attention
         )  # (bs, time, num_heads, head_size)
-        h_ = tf.reshape(attention, (-1, x.shape[1], self.num_heads * self.head_size))
+        h_ = tf.reshape(attention, (-1, tf.shape(x)[1], self.num_heads * self.head_size))
         return apply_seq(h_, self.to_out)
 
 
@@ -96,7 +95,7 @@ class BasicTransformerBlock(keras.layers.Layer):
 class SpatialTransformer(keras.layers.Layer):
     def __init__(self, channels, n_heads, d_head):
         super().__init__()
-        self.norm = tfa.layers.GroupNormalization(epsilon=1e-5)
+        self.norm = GroupNormalization(epsilon=1e-5)
         assert channels == n_heads * d_head
         self.proj_in = PaddedConv2D(n_heads * d_head, 1)
         self.transformer_blocks = [BasicTransformerBlock(channels, n_heads, d_head)]
@@ -104,7 +103,9 @@ class SpatialTransformer(keras.layers.Layer):
 
     def call(self, inputs):
         x, context = inputs
-        b, h, w, c = x.shape
+        shape = tf.shape(x)
+        b, h, w = shape[0], shape[1], shape[2]
+        c = x.shape[3]
         x_in = x
         x = self.norm(x)
         x = self.proj_in(x)
@@ -185,7 +186,7 @@ class UNetModel(keras.models.Model):
             [ResBlock(640, 320), SpatialTransformer(320, 8, 40)],
         ]
         self.out = [
-            tfa.layers.GroupNormalization(epsilon=1e-5),
+            GroupNormalization(epsilon=1e-5),
             keras.activations.swish,
             PaddedConv2D(4, kernel_size=3, padding=1),
         ]
