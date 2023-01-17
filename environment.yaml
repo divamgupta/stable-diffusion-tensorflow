@@ -1,0 +1,6 @@
+name: stable-diffusion
+
+dependencies:
+  - pip:
+    - ./
+  
