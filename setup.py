@@ -23,6 +23,8 @@ setup(
     entry_points = {
         'console_scripts': [
             'text2image=execution.main:main',
+            'image2image=execution.main:main',
+            'stable-diffusion=execution.main:main',
         ],
     }
 )
