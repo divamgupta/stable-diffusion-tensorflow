@@ -47,7 +47,13 @@ git clone git@github.com:divamgupta/stable-diffusion-tensorflow.git
 
 #### Using pip without a virtual environment
 
-Install dependencies using the `requirements.txt` file or the `requirements_m1.txt` file,:
+Python Dependencies are automatically installed for Linux and Windows platforms when installing the package:
+
+```bash
+pip install .
+```
+
+For OSX , Install dependencies from `requirements_m1.txt` file,:
 
 ```bash
 pip install -r requirements.txt
@@ -72,6 +78,10 @@ pip install -r requirements.txt
     ```bash
     pip install -r requirements.txt
     ```
+
+#### Using a virtual environment with *anaconda*
+
+The `environment.yaml` file is configured to install dependencies from 
 
 ## Usage
 
@@ -110,7 +120,41 @@ img = generator.generate(
 Image.fromarray(img[0]).save("output.png")
 ```
 
-### Using `text2image.py` from the git repo
+### Running
+
+After installing the package, the command `stable-diffusion` will be available:
+
+```bash
+$> stable-diffusion --help
+
+Usage: stable-diffusion [OPTIONS]
+
+Options:
+  -p, --prompt TEXT               the prompt to render  [required]
+  -o, --output TEXT               Path where to save the output image
+  --negative-prompt TEXT          the negative prompt to use (if any)
+  -H, --height, --H INTEGER       Image height, in pixels
+  -W, --width, --W INTEGER        Image width, in pixels
+  --scale FLOAT                   Unconditional guidance scale: eps = eps(x,
+                                  empty) + scale * (eps(x, cond) - eps(x,
+                                  empty))
+  --steps INTEGER                 Number of ddim sampling steps
+  --seed INTEGER                  Optionally specify a seed integer for
+                                  reproducible results
+  --mixed-precision, --mp BOOLEAN
+                                  Enable mixed precision (fp16 computation)
+  --temperature INTEGER           Generator temperature
+  --batch-size INTEGER            Batch size temperature
+  -i, --input-image-path, --input TEXT
+                                  Path to input image
+  --log-level [NOTSET|DEBUG|INFO|WARN|ERROR|CRITICAL]
+                                  Python Log level value
+  --help                          Show this message and exit.
+```
+
+You can use the aliases `image2image` and `text2image`.
+ 
+#### Using `text2image` from the git repo
 
 Assuming you have installed the required packages, 
 you can generate images from a text prompt using:
@@ -126,8 +170,8 @@ If you want to use a different name, use the `--output` flag.
 python text2image.py --prompt="An astronaut riding a horse" --output="my_image.png"
 ```
 
-Check out the `text2image.py` file for more options, including image size, number of steps, etc.  
-### Using `img2img.py` from the git repo
+Check out the `text2image` file for more options, including image size, number of steps, etc.  
+#### Using `img2img` from the git repo
 
 Assuming you have installed the required packages, 
 you can modify images from a text prompt using:
@@ -139,7 +183,7 @@ python img2img.py --prompt="a high quality sketch of people standing with sun an
 The generated image will be named `img2img-out.jpeg` by default on the root of the repo.
 If you want to use a different name, use the `--output` flag.  
 
-Check out the `img2img.py` file for more options, including the number of steps.
+Check out the `img2img` file for more options, including the number of steps.
 
 ## Example outputs 
 
