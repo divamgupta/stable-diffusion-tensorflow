@@ -1,6 +1,8 @@
 name: stable-diffusion
-
+channels:
+  - conda-forge
 dependencies:
+  - cudatoolkit==11.2.2
   - pip:
     - ./
   
