@@ -16,12 +16,12 @@ MAX_TEXT_LEN = 77
 
 
 class StableDiffusion:
-    def __init__(self, img_height=1000, img_width=1000, jit_compile=False, download_weights=True):
+    def __init__(self, img_height=1000, img_width=1000, jit_compile=False, download_weights=True, n_unet_ch=4):
         self.img_height = img_height
         self.img_width = img_width
         self.tokenizer = SimpleTokenizer()
 
-        text_encoder, diffusion_model, decoder, encoder = get_models( download_weights=download_weights)
+        text_encoder, diffusion_model, decoder, encoder = get_models( download_weights=download_weights, n_unet_ch=n_unet_ch)
         self.text_encoder = text_encoder
         self.diffusion_model = diffusion_model
         self.decoder = decoder
