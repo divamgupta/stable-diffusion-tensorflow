@@ -224,7 +224,7 @@ class StableDiffusion:
             getattr(self, module_name).set_weights(module_weights)
             print("Loaded %d weights for %s"%(len(module_weights) , module_name))
 
-def get_models(download_weights=True):
+def get_models(download_weights=True, n_unet_ch=4):
     # Create text encoder
     input_word_ids = keras.layers.Input(shape=(MAX_TEXT_LEN,), dtype="int32")
     input_pos_ids = keras.layers.Input(shape=(MAX_TEXT_LEN,), dtype="int32")
@@ -234,7 +234,7 @@ def get_models(download_weights=True):
     # Creation diffusion UNet
     context = keras.layers.Input((MAX_TEXT_LEN, 768))
     t_emb = keras.layers.Input((320,))
-    latent = keras.layers.Input((None, None, 4))
+    latent = keras.layers.Input((None, None, n_unet_ch))
     unet = UNetModel()
     diffusion_model = keras.models.Model(
         [latent, t_emb, context], unet([latent, t_emb, context])
