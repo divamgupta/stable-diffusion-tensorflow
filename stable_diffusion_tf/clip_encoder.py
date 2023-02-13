@@ -9,7 +9,7 @@ from .layers import quick_gelu
 class CLIPAttention(keras.layers.Layer):
     def __init__(self):
         super().__init__()
-        self.embed_dim = 768
+        self.embed_dim = 1024
         self.num_heads = 12
         self.head_dim = self.embed_dim // self.num_heads
         self.scale = self.head_dim**-0.5
@@ -61,7 +61,7 @@ class CLIPEncoderLayer(keras.layers.Layer):
         self.self_attn = CLIPAttention()
         self.layer_norm2 = keras.layers.LayerNormalization(epsilon=1e-5)
         self.fc1 = keras.layers.Dense(3072)
-        self.fc2 = keras.layers.Dense(768)
+        self.fc2 = keras.layers.Dense(1024)
 
     def call(self, inputs):
         hidden_states, causal_attention_mask = inputs
@@ -97,10 +97,10 @@ class CLIPTextEmbeddings(keras.layers.Layer):
     def __init__(self, n_words=77):
         super().__init__()
         self.token_embedding_layer = keras.layers.Embedding(
-            49408, 768, name="token_embedding"
+            49408, 1024, name="token_embedding"
         )
         self.position_embedding_layer = keras.layers.Embedding(
-            n_words, 768, name="position_embedding"
+            n_words, 1024, name="position_embedding"
         )
 
     def call(self, inputs):

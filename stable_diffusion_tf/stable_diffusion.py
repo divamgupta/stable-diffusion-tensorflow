@@ -217,7 +217,12 @@ class StableDiffusion:
         for module_name in ['text_encoder', 'diffusion_model', 'decoder', 'encoder' ]:
             module_weights = []
             for i , (key , perm ) in enumerate(PYTORCH_CKPT_MAPPING[module_name]):
+                if "cond_stage_model." in key: # ignoring the text encoder for now
+                    continue
                 w = pt_weights['state_dict'][key].numpy()
+                if ".proj_in.weight" in key or ".proj_out.weight" in key:
+                    if len(w.shape) == 2:
+                        w = w[: , : , None , None]
                 if perm is not None:
                     w = np.transpose(w , perm )
                 module_weights.append(w)
@@ -232,7 +237,7 @@ def get_models(download_weights=True, n_unet_ch=4):
     text_encoder = keras.models.Model([input_word_ids, input_pos_ids], embeds)
 
     # Creation diffusion UNet
-    context = keras.layers.Input((MAX_TEXT_LEN, 768))
+    context = keras.layers.Input((MAX_TEXT_LEN, 1024))
     t_emb = keras.layers.Input((320,))
     latent = keras.layers.Input((None, None, n_unet_ch))
     unet = UNetModel()
