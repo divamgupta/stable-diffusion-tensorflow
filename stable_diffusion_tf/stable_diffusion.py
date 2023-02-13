@@ -226,7 +226,10 @@ class StableDiffusion:
                 if perm is not None:
                     w = np.transpose(w , perm )
                 module_weights.append(w)
-            getattr(self, module_name).set_weights(module_weights)
+            if len(module_weights) == len(getattr(self, module_name).get_weights()):
+                getattr(self, module_name).set_weights(module_weights)
+            else:
+                print("skip")
             print("Loaded %d weights for %s"%(len(module_weights) , module_name))
 
 def get_models(download_weights=True, n_unet_ch=4):
