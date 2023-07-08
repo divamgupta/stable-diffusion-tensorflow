@@ -187,7 +187,7 @@ class UNetModel(keras.models.Model):
         ]
         self.out = [
             GroupNormalization(epsilon=1e-5),
-            tf.keras.activations.swish,
+            keras.activations.swish,
             PaddedConv2D(4, kernel_size=3, padding=1),
         ]
 
