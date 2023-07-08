@@ -146,48 +146,48 @@ class UNetModel(keras.models.Model):
         ]
         self.input_blocks = [
             [PaddedConv2D(320, kernel_size=3, padding=1)],
-            [ResBlock(320, 320), SpatialTransformer(320, 8, 40)],
-            [ResBlock(320, 320), SpatialTransformer(320, 8, 40)],
+            [ResBlock(320, 320), SpatialTransformer(320, 5, 64)],
+            [ResBlock(320, 320), SpatialTransformer(320, 5, 64)],
             [Downsample(320)],
-            [ResBlock(320, 640), SpatialTransformer(640, 8, 80)],
-            [ResBlock(640, 640), SpatialTransformer(640, 8, 80)],
+            [ResBlock(320, 640), SpatialTransformer(640, 10, 64)],
+            [ResBlock(640, 640), SpatialTransformer(640, 10, 64)],
             [Downsample(640)],
-            [ResBlock(640, 1280), SpatialTransformer(1280, 8, 160)],
-            [ResBlock(1280, 1280), SpatialTransformer(1280, 8, 160)],
+            [ResBlock(640, 1280), SpatialTransformer(1280, 20, 64)],
+            [ResBlock(1280, 1280), SpatialTransformer(1280, 20, 64)],
             [Downsample(1280)],
             [ResBlock(1280, 1280)],
             [ResBlock(1280, 1280)],
         ]
         self.middle_block = [
             ResBlock(1280, 1280),
-            SpatialTransformer(1280, 8, 160),
+            SpatialTransformer(1280, 20, 64),
             ResBlock(1280, 1280),
         ]
         self.output_blocks = [
             [ResBlock(2560, 1280)],
             [ResBlock(2560, 1280)],
             [ResBlock(2560, 1280), Upsample(1280)],
-            [ResBlock(2560, 1280), SpatialTransformer(1280, 8, 160)],
-            [ResBlock(2560, 1280), SpatialTransformer(1280, 8, 160)],
+            [ResBlock(2560, 1280), SpatialTransformer(1280, 20, 64)],
+            [ResBlock(2560, 1280), SpatialTransformer(1280, 20, 64)],
             [
                 ResBlock(1920, 1280),
-                SpatialTransformer(1280, 8, 160),
+                SpatialTransformer(1280, 20, 64),
                 Upsample(1280),
             ],
-            [ResBlock(1920, 640), SpatialTransformer(640, 8, 80)],  # 6
-            [ResBlock(1280, 640), SpatialTransformer(640, 8, 80)],
+            [ResBlock(1920, 640), SpatialTransformer(640, 10, 64)],  # 6
+            [ResBlock(1280, 640), SpatialTransformer(640, 10, 64)],
             [
                 ResBlock(960, 640),
-                SpatialTransformer(640, 8, 80),
+                SpatialTransformer(640, 10, 64),
                 Upsample(640),
             ],
-            [ResBlock(960, 320), SpatialTransformer(320, 8, 40)],
-            [ResBlock(640, 320), SpatialTransformer(320, 8, 40)],
-            [ResBlock(640, 320), SpatialTransformer(320, 8, 40)],
+            [ResBlock(960, 320), SpatialTransformer(320, 5, 64)],
+            [ResBlock(640, 320), SpatialTransformer(320, 5, 64)],
+            [ResBlock(640, 320), SpatialTransformer(320, 5, 64)],
         ]
         self.out = [
             GroupNormalization(epsilon=1e-5),
-            keras.activations.swish,
+            tf.keras.activations.swish,
             PaddedConv2D(4, kernel_size=3, padding=1),
         ]
 
